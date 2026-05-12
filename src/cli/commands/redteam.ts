@@ -727,6 +727,9 @@ export function registerRedteamCommand(program: Command): void {
     .option('--type <type>', 'Job type: STATIC, DYNAMIC, or CUSTOM', 'STATIC')
     .option('--categories <json>', 'Category filter JSON (STATIC scans)')
     .option('--prompt-sets <uuids>', 'Comma-separated prompt set UUIDs (CUSTOM scans)')
+    .option('--goals <file>', 'JSON file or inline JSON array of attack goals (DYNAMIC scans)')
+    .option('--depth <number>', 'Max conversation turns per goal (DYNAMIC scans)', '10')
+    .option('--breadth <number>', 'Parallel agents per goal (DYNAMIC scans)', '6')
     .option('--no-wait', 'Submit scan without waiting for completion')
     .action(async (opts) => {
       try {
@@ -742,6 +745,16 @@ export function registerRedteamCommand(program: Command): void {
           ? (opts.promptSets as string).split(',').map((s: string) => s.trim())
           : undefined;
 
+        let attackGoals: string[] | undefined;
+        if (opts.goals) {
+          const goalsInput = opts.goals as string;
+          if (goalsInput.startsWith('[')) {
+            attackGoals = JSON.parse(goalsInput);
+          } else {
+            attackGoals = JSON.parse(fs.readFileSync(goalsInput, 'utf-8'));
+          }
+        }
+
         console.log(`  Creating ${opts.type} scan "${opts.name}"...`);
         const job = await service.createScan({
           name: opts.name,
@@ -749,6 +762,9 @@ export function registerRedteamCommand(program: Command): void {
           jobType: opts.type,
           categories,
           customPromptSets,
+          attackGoals,
+          streamDepth: parseInt(opts.depth as string, 10),
+          streamBreadth: parseInt(opts.breadth as string, 10),
         });
 
         renderScanStatus(job);

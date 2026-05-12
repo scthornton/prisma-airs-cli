@@ -293,6 +293,9 @@ export class SdkRedTeamService implements RedTeamService {
     jobType: string;
     categories?: Record<string, unknown>;
     customPromptSets?: string[];
+    attackGoals?: string[];
+    streamDepth?: number;
+    streamBreadth?: number;
   }): Promise<RedTeamJob> {
     let jobMetadata: Record<string, unknown> = {};
     if (request.jobType === 'STATIC' && request.categories) {
@@ -300,6 +303,12 @@ export class SdkRedTeamService implements RedTeamService {
     } else if (request.jobType === 'CUSTOM' && request.customPromptSets) {
       jobMetadata = {
         custom_prompt_sets: request.customPromptSets,
+      };
+    } else if (request.jobType === 'DYNAMIC') {
+      jobMetadata = {
+        stream_breadth: request.streamBreadth ?? 6,
+        stream_depth: request.streamDepth ?? 10,
+        ...(request.attackGoals?.length ? { attack_goals: request.attackGoals } : {}),
       };
     }
 
