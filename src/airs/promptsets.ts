@@ -38,9 +38,11 @@ function normalizePrompt(raw: Record<string, unknown>): PromptDetail {
  */
 export class SdkPromptSetService implements PromptSetService {
   private client: RedTeamClient;
+  private opts?: RedTeamClientOptions;
 
   constructor(opts?: RedTeamClientOptions) {
     this.client = new RedTeamClient(opts);
+    this.opts = opts;
   }
 
   async createPromptSet(
@@ -106,14 +108,26 @@ export class SdkPromptSetService implements PromptSetService {
   async downloadTemplate(uuid: string): Promise<string> {
     // WORKAROUND: Bypass SDK's downloadTemplate — it routes through managementHttpRequest
     // which unconditionally JSON.parse()s the response, but this endpoint returns text/csv.
-    // Make a raw fetch using the SDK's OAuth client instead.
+    // Fetch a fresh OAuth token and make a raw request instead.
     // Tracked upstream: https://github.com/cdot65/prisma-airs-sdk/issues/77
-    const internals = this.client.customAttacks as unknown as {
-      baseUrl: string;
-      oauthClient: { getToken(): Promise<string> };
-    };
-    const token = await internals.oauthClient.getToken();
-    const base = internals.baseUrl.replace(/\/+$/, '');
+    const tokenEndpoint =
+      this.opts?.tokenEndpoint ?? 'https://auth.apps.paloaltonetworks.com/oauth2/access_token';
+    const tokenRes = await fetch(tokenEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: this.opts?.clientId ?? '',
+        client_secret: this.opts?.clientSecret ?? '',
+        scope: `tsg_id:${this.opts?.tsgId ?? ''}`,
+      }),
+    });
+    if (!tokenRes.ok) {
+      throw new Error(`OAuth token request failed (${tokenRes.status})`);
+    }
+    const { access_token: token } = (await tokenRes.json()) as { access_token: string };
+
+    const base = 'https://api.sase.paloaltonetworks.com/aisec';
     const url = `${base}/v1/custom-attack/download-template/${uuid}`;
     const res = await fetch(url, {
       method: 'GET',
