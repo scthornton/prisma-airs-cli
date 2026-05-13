@@ -104,26 +104,7 @@ export class SdkPromptSetService implements PromptSetService {
   }
 
   async downloadTemplate(uuid: string): Promise<string> {
-    // WORKAROUND: Bypass SDK's downloadTemplate — it routes through managementHttpRequest
-    // which unconditionally JSON.parse()s the response, but this endpoint returns text/csv.
-    // Make a raw fetch using the SDK's OAuth client instead.
-    // Tracked upstream: https://github.com/cdot65/prisma-airs-sdk/issues/77
-    const internals = this.client.customAttacks as unknown as {
-      baseUrl: string;
-      oauthClient: { getToken(): Promise<string> };
-    };
-    const token = await internals.oauthClient.getToken();
-    const base = internals.baseUrl.replace(/\/+$/, '');
-    const url = `${base}/v1/custom-attack/download-template/${uuid}`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Download template failed (${res.status}): ${body}`);
-    }
-    return res.text();
+    return this.client.customAttacks.downloadTemplate(uuid);
   }
 
   async uploadPromptsCsv(uuid: string, file: Blob): Promise<{ message: string; status: number }> {
