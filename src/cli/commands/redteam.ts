@@ -64,6 +64,31 @@ async function createPromptSetService() {
   });
 }
 
+/** Parse `--goals` arg as inline JSON array (starts with `[`) or path to a JSON file. */
+export function parseAttackGoals(input: string): string[] {
+  const trimmed = input.trim();
+  const raw = trimmed.startsWith('[') ? trimmed : fs.readFileSync(trimmed, 'utf-8');
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`--goals: invalid JSON (${err instanceof Error ? err.message : err})`);
+  }
+  if (!Array.isArray(parsed) || !parsed.every((g) => typeof g === 'string' && g.length > 0)) {
+    throw new Error('--goals: expected a JSON array of non-empty strings');
+  }
+  return parsed;
+}
+
+/** Parse a string flag as a positive integer. */
+export function parsePositiveInt(input: string, flag: string): number {
+  const n = Number.parseInt(input, 10);
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error(`${flag}: expected a positive integer, got "${input}"`);
+  }
+  return n;
+}
+
 /** Valid provider names for target init templates. */
 export const VALID_TARGET_PROVIDERS = [
   'OPENAI',
@@ -745,15 +770,9 @@ export function registerRedteamCommand(program: Command): void {
           ? (opts.promptSets as string).split(',').map((s: string) => s.trim())
           : undefined;
 
-        let attackGoals: string[] | undefined;
-        if (opts.goals) {
-          const goalsInput = opts.goals as string;
-          if (goalsInput.startsWith('[')) {
-            attackGoals = JSON.parse(goalsInput);
-          } else {
-            attackGoals = JSON.parse(fs.readFileSync(goalsInput, 'utf-8'));
-          }
-        }
+        const attackGoals = opts.goals ? parseAttackGoals(opts.goals as string) : undefined;
+        const streamDepth = parsePositiveInt(opts.depth as string, '--depth');
+        const streamBreadth = parsePositiveInt(opts.breadth as string, '--breadth');
 
         console.log(`  Creating ${opts.type} scan "${opts.name}"...`);
         const job = await service.createScan({
@@ -763,8 +782,8 @@ export function registerRedteamCommand(program: Command): void {
           categories,
           customPromptSets,
           attackGoals,
-          streamDepth: parseInt(opts.depth as string, 10),
-          streamBreadth: parseInt(opts.breadth as string, 10),
+          streamDepth,
+          streamBreadth,
         });
 
         renderScanStatus(job);

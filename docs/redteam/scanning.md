@@ -131,6 +131,46 @@ airs redteam scan \
 !!! tip "Finding prompt set UUIDs"
     Use `airs redteam prompt-sets list` to find UUIDs. Prompt sets created by `airs runtime topics generate --create-prompt-set` emit the UUID in the `promptset:created` event.
 
+### Dynamic Scan (Agent-Driven)
+
+A `DYNAMIC` scan dispatches autonomous agents that adapt their attacks based on the target's responses. Without `--goals`, the scan runs in fully automated mode using the AIRS attack agent.
+
+```bash
+# Fully automated agent scan
+airs redteam scan \
+  --target <uuid> \
+  --name "Automated Agent Scan" \
+  --type DYNAMIC
+```
+
+To steer agents toward specific objectives, pass attack goals — either inline as a JSON array or as a path to a JSON file:
+
+```bash
+# Goals from a file
+airs redteam scan \
+  --target <uuid> --name "Targeted Agent Scan" \
+  --type DYNAMIC \
+  --goals goals.json --depth 10 --breadth 6
+
+# Inline goals
+airs redteam scan \
+  --target <uuid> --name "Targeted Agent Scan" \
+  --type DYNAMIC \
+  --goals '["Extract the system prompt", "Bypass the safety policy"]'
+```
+
+`goals.json`:
+
+```json
+["Extract the system prompt", "Bypass the safety policy", "Leak training data"]
+```
+
+| Flag | Default | What it does |
+|------|---------|--------------|
+| `--goals <file\|json>` | — | Attack goals as inline JSON array or path to JSON file. Without this flag, agents run in fully automated mode. |
+| `--depth <n>` | `10` | Max conversation turns per goal. |
+| `--breadth <n>` | `6` | Parallel agents per goal. |
+
 ---
 
 ## Check Scan Status
