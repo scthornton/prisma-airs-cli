@@ -503,7 +503,8 @@ export function registerRedteamCommand(program: Command): void {
         renderRedteamHeader();
         const service = await createPromptSetService();
         const content = fs.readFileSync(file);
-        const blob = new Blob([content], { type: 'text/csv' });
+        const filename = path.basename(file);
+        const blob = new File([content], filename, { type: 'text/csv' });
         const result = await service.uploadPromptsCsv(uuid, blob);
         console.log(`  ${result.message}\n`);
       } catch (err) {
