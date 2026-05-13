@@ -181,7 +181,7 @@ describe('SdkRedTeamService', () => {
       });
     });
 
-    it('creates a DYNAMIC scan with empty metadata', async () => {
+    it('creates a DYNAMIC scan with default breadth/depth and no goals', async () => {
       mockScansCreate.mockResolvedValue({
         uuid: 'job-3',
         name: 'Dynamic Scan',
@@ -201,7 +201,41 @@ describe('SdkRedTeamService', () => {
         name: 'Dynamic Scan',
         target: { uuid: 't-1' },
         job_type: 'DYNAMIC',
-        job_metadata: {},
+        job_metadata: {
+          stream_breadth: 6,
+          stream_depth: 10,
+        },
+      });
+    });
+
+    it('creates a DYNAMIC scan with goals, depth, and breadth', async () => {
+      mockScansCreate.mockResolvedValue({
+        uuid: 'job-4',
+        name: 'Agent Scan',
+        status: 'QUEUED',
+        job_type: 'DYNAMIC',
+        target_id: 't-1',
+        target: { name: 'Target 1' },
+      });
+
+      await service.createScan({
+        name: 'Agent Scan',
+        targetUuid: 't-1',
+        jobType: 'DYNAMIC',
+        attackGoals: ['Extract system prompt', 'Bypass safety'],
+        streamDepth: 15,
+        streamBreadth: 8,
+      });
+
+      expect(mockScansCreate).toHaveBeenCalledWith({
+        name: 'Agent Scan',
+        target: { uuid: 't-1' },
+        job_type: 'DYNAMIC',
+        job_metadata: {
+          stream_breadth: 8,
+          stream_depth: 15,
+          attack_goals: ['Extract system prompt', 'Bypass safety'],
+        },
       });
     });
   });

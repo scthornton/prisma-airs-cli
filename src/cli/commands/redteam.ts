@@ -64,6 +64,31 @@ async function createPromptSetService() {
   });
 }
 
+/** Parse `--goals` arg as inline JSON array (starts with `[`) or path to a JSON file. */
+export function parseAttackGoals(input: string): string[] {
+  const trimmed = input.trim();
+  const raw = trimmed.startsWith('[') ? trimmed : fs.readFileSync(trimmed, 'utf-8');
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`--goals: invalid JSON (${err instanceof Error ? err.message : err})`);
+  }
+  if (!Array.isArray(parsed) || !parsed.every((g) => typeof g === 'string' && g.length > 0)) {
+    throw new Error('--goals: expected a JSON array of non-empty strings');
+  }
+  return parsed;
+}
+
+/** Parse a string flag as a positive integer. */
+export function parsePositiveInt(input: string, flag: string): number {
+  const n = Number.parseInt(input, 10);
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error(`${flag}: expected a positive integer, got "${input}"`);
+  }
+  return n;
+}
+
 /** Valid provider names for target init templates. */
 export const VALID_TARGET_PROVIDERS = [
   'OPENAI',
@@ -728,6 +753,9 @@ export function registerRedteamCommand(program: Command): void {
     .option('--type <type>', 'Job type: STATIC, DYNAMIC, or CUSTOM', 'STATIC')
     .option('--categories <json>', 'Category filter JSON (STATIC scans)')
     .option('--prompt-sets <uuids>', 'Comma-separated prompt set UUIDs (CUSTOM scans)')
+    .option('--goals <file>', 'JSON file or inline JSON array of attack goals (DYNAMIC scans)')
+    .option('--depth <number>', 'Max conversation turns per goal (DYNAMIC scans)', '10')
+    .option('--breadth <number>', 'Parallel agents per goal (DYNAMIC scans)', '6')
     .option('--no-wait', 'Submit scan without waiting for completion')
     .action(async (opts) => {
       try {
@@ -743,6 +771,10 @@ export function registerRedteamCommand(program: Command): void {
           ? (opts.promptSets as string).split(',').map((s: string) => s.trim())
           : undefined;
 
+        const attackGoals = opts.goals ? parseAttackGoals(opts.goals as string) : undefined;
+        const streamDepth = parsePositiveInt(opts.depth as string, '--depth');
+        const streamBreadth = parsePositiveInt(opts.breadth as string, '--breadth');
+
         console.log(`  Creating ${opts.type} scan "${opts.name}"...`);
         const job = await service.createScan({
           name: opts.name,
@@ -750,6 +782,9 @@ export function registerRedteamCommand(program: Command): void {
           jobType: opts.type,
           categories,
           customPromptSets,
+          attackGoals,
+          streamDepth,
+          streamBreadth,
         });
 
         renderScanStatus(job);

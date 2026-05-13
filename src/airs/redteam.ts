@@ -24,6 +24,9 @@ import type {
 
 const TERMINAL_STATUSES = new Set(['COMPLETED', 'PARTIALLY_COMPLETE', 'FAILED', 'ABORTED']);
 
+export const DEFAULT_DYNAMIC_BREADTH = 6;
+export const DEFAULT_DYNAMIC_DEPTH = 10;
+
 /** Normalize an SDK job response into a RedTeamJob. */
 function normalizeJob(raw: Record<string, unknown>): RedTeamJob {
   const target = raw.target as Record<string, unknown> | undefined;
@@ -293,6 +296,9 @@ export class SdkRedTeamService implements RedTeamService {
     jobType: string;
     categories?: Record<string, unknown>;
     customPromptSets?: string[];
+    attackGoals?: string[];
+    streamDepth?: number;
+    streamBreadth?: number;
   }): Promise<RedTeamJob> {
     let jobMetadata: Record<string, unknown> = {};
     if (request.jobType === 'STATIC' && request.categories) {
@@ -300,6 +306,12 @@ export class SdkRedTeamService implements RedTeamService {
     } else if (request.jobType === 'CUSTOM' && request.customPromptSets) {
       jobMetadata = {
         custom_prompt_sets: request.customPromptSets,
+      };
+    } else if (request.jobType === 'DYNAMIC') {
+      jobMetadata = {
+        stream_breadth: request.streamBreadth ?? DEFAULT_DYNAMIC_BREADTH,
+        stream_depth: request.streamDepth ?? DEFAULT_DYNAMIC_DEPTH,
+        ...(request.attackGoals?.length ? { attack_goals: request.attackGoals } : {}),
       };
     }
 
