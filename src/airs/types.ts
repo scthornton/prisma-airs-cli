@@ -467,6 +467,9 @@ export interface RedTeamService {
     jobType: string;
     categories?: Record<string, unknown>;
     customPromptSets?: string[];
+    attackGoals?: string[];
+    streamDepth?: number;
+    streamBreadth?: number;
   }): Promise<RedTeamJob>;
 
   /** Get scan status by job ID. */

@@ -517,6 +517,9 @@ airs redteam scan [options]
 | `--type <type>` | `STATIC` | Job type: `STATIC`, `DYNAMIC`, or `CUSTOM` |
 | `--categories <json>` | all | Category filter JSON (STATIC scans) |
 | `--prompt-sets <uuids>` | — | Comma-separated prompt set UUIDs (CUSTOM scans) |
+| `--goals <file\|json>` | — | Inline JSON array or path to JSON file of attack goal strings (DYNAMIC scans) |
+| `--depth <n>` | `10` | Max conversation turns per goal (DYNAMIC scans) |
+| `--breadth <n>` | `6` | Parallel agents per goal (DYNAMIC scans) |
 | `--no-wait` | wait | Submit without waiting for completion |
 
 ```bash
@@ -527,6 +530,11 @@ airs redteam scan --target <uuid> --name "Full Scan"
 airs redteam scan \
   --target <uuid> --name "Topic Validation" \
   --type CUSTOM --prompt-sets <uuid1>,<uuid2>
+
+# Dynamic (agent-driven) scan with attack goals from a file
+airs redteam scan \
+  --target <uuid> --name "Agent Scan" \
+  --type DYNAMIC --goals goals.json --depth 10 --breadth 6
 ```
 
 ### redteam status
