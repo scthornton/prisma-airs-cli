@@ -1,5 +1,26 @@
 # Release Notes
 
+## v2.9.0
+
+### New
+
+- **DLP command group** — `airs runtime dlp` adds full CRUD across four DLP subclients:
+  - `filtering-profiles` (list/get/replace)
+  - `patterns` (list/create/get/replace/patch/soft-delete)
+  - `profiles` (list/create/get/replace/patch — no delete; archive via patching `profile_status`)
+  - `dictionaries` (full CRUD with multipart upload; handles both 200+body and 204+empty replace responses)
+- Optional `PANW_DLP_ENDPOINT` env var (defaults to SDK built-in).
+
+### Fixed
+
+- **`--debug` now captures DLP traffic** — fetch interceptor's host allowlist was missing `api.dlp.paloaltonetworks.com`, so `runtime dlp` commands were silently bypassing the JSONL log.
+
+### Dependencies
+
+- `@cdot65/prisma-airs-sdk` bumped to `^0.9.2` (DLP nested helper nullable sweep — unblocks `runtime dlp patterns list` and `runtime dlp profiles list` against live tenants).
+
+---
+
 ## v2.4.0
 
 ### New
