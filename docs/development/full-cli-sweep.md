@@ -126,7 +126,76 @@ airs model-security labels values <labelKey>
 airs model-security pypi-auth
 ```
 
-### B.4 — Runtime DLP test-file generation (local, no API)
+### B.4 — Runtime DLP (data patterns, profiles, dictionaries, filtering profiles)
+
+Read-only sweep of the four DLP resources exposed by `airs runtime dlp`. Distinct from `airs runtime dlp-profiles list` above (that's the read-only DLP profile list used in Security Profiles).
+
+```bash
+# Lists (Spring Page<> envelopes; totalElements/totalPages emit as null)
+airs runtime dlp patterns list --size 3 --output json
+airs runtime dlp profiles list --size 3 --output json
+airs runtime dlp dictionaries list --size 3 --output json
+airs runtime dlp filtering-profiles list --size 3 --output json
+
+# Gets that work
+airs runtime dlp dictionaries get <dictionaryId> --keywords --output json
+airs runtime dlp filtering-profiles get <filteringProfileId> --output json
+
+# Gets affected by upstream known issue (see callout below)
+airs runtime dlp patterns get <patternId> --output json     # 400 expected
+airs runtime dlp profiles get <profileId> --output json     # 400 expected
+```
+
+**Live sample — `dictionaries get` with `--keywords`** (against a real tenant):
+
+```json
+{
+  "id": "69012dfa1cc7eba99b07bf7d",
+  "name": "US Export Control Items",
+  "category": "Confidential",
+  "region_name": "GLOBAL",
+  "type": "predefined",
+  "dictionary_metadata": {
+    "number_of_keywords": 1691,
+    "original_file_name": "",
+    "original_file_size_in_byte": 0
+  },
+  "keywords": [
+    "Absolute reflectance measurement equipment",
+    "Absorbers of electromagnetic waves",
+    "Absorption columns",
+    "Accelerators",
+    "Accelerometer axis align stations"
+  ]
+}
+```
+
+**Live sample — `filtering-profiles get`**:
+
+```json
+{
+  "id": "6a109d22d4d22888bbeb14f0",
+  "name": "asdfafdsadsa",
+  "type": "custom",
+  "data_profile_id": 11995048,
+  "direction": "c2s",
+  "file_based": true,
+  "non_file_based": false,
+  "scan_type": "include",
+  "rule1": {
+    "action": "alert",
+    "response_page": "This file has dlp issues",
+    "show_rsp_page": "no"
+  },
+  "rule2": null,
+  "file_type": ["csv", "doc", "docx", "pdf", "txt-upload", "xlsx", "7z"]
+}
+```
+
+!!! warning "Known issue (2026-05-23) — GET by id returns 400"
+    `GET /v2/api/data-patterns/{id}` and `GET /v2/api/data-profiles/{id}` currently return generic HTTP 400 against live tenants, even with valid IDs from `list`. Reproducible via `curl` with the same credentials — server-side, not CLI or SDK. Tracked: [cdot65/prisma-airs-sdk#162](https://github.com/cdot65/prisma-airs-sdk/issues/162), [cdot65/prisma-airs-cli#80](https://github.com/cdot65/prisma-airs-cli/issues/80). Workaround: `airs runtime dlp patterns list --output json | jq '.content[] | select(.id == "...")'`.
+
+### B.5 — Runtime DLP test-file generation (local, no API)
 
 Generates clean carrier files plus "dirty" copies with synthetic sensitive data embedded via
 multiple techniques. Local only — no AIRS API calls, safe to run anywhere.
@@ -396,6 +465,77 @@ airs model-security labels delete <scanUuid> --keys env
 airs model-security groups delete <groupUuid> --force
 ```
 
+### D.8 — Runtime DLP writes (patterns CRUD; profiles read-only by upstream constraint)
+
+DLP mutations have **partial coverage** on this tenant — patterns support CREATE + DELETE, but PATCH/REPLACE/GET-by-id and all profile/dictionary mutations currently return generic 400 from the upstream API. See the known-issue callout in B.4 and the matrix at the end of this section.
+
+```bash
+# CREATE a custom pattern (works ✓)
+cat > pattern.json <<'EOF'
+{
+  "name": "cli-smoke-pattern",
+  "type": "custom",
+  "description": "throwaway smoke test pattern",
+  "detection_config": {
+    "technique": "regex",
+    "supported_confidence_levels": ["high", "low"]
+  },
+  "matching_rules": {
+    "delimiter": ";",
+    "proximity_distance": 200,
+    "regexes": [{ "regex": "SMOKE-TEST-[A-Z0-9]{8}", "weight": 1 }]
+  },
+  "tags": { "classification": ["smoke-test"] }
+}
+EOF
+airs runtime dlp patterns create --body-file pattern.json --output json
+
+# Soft-DELETE (works ✓ — status flips to "deleted", still resolvable via list filtering)
+airs runtime dlp patterns delete <patternId>
+```
+
+**Live sample — pattern `create` response**:
+
+```json
+{
+  "id": "6a1207e1b506f2608077f153",
+  "name": "cli-smoke-20260523-200235",
+  "status": "active",
+  "version": 1,
+  "type": "custom",
+  "audit_metadata": {
+    "created_at": 1779566561867,
+    "created_by": "API",
+    "updated_at": 1779566561867,
+    "updated_by": "API"
+  }
+}
+```
+
+**Live sample — pattern `delete` response**:
+
+```
+archived 6a1207e1b506f2608077f153
+```
+
+#### DLP mutation matrix (as observed 2026-05-23)
+
+| Resource | LIST | GET | CREATE | PATCH | REPLACE | DELETE |
+|---|---|---|---|---|---|---|
+| patterns | ✓ | ✗ 400 | ✓ | ✗ 400 | not tested | ✓ |
+| profiles | ✓ | ✗ 400 | ✗ 400 | not tested | not tested | n/a |
+| dictionaries | ✓ | ✓ | not tested | not tested | not tested | not tested |
+| filtering-profiles | ✓ | ✓ | n/a | n/a | n/a | n/a |
+
+All `✗ 400` cells return identical generic Bad Request body (`{type: about:blank, title: Bad Request, status: 400, instance: <path>, timestamp: ...}` — no field-level detail). Reproduced via direct `curl` with cloned bodies, confirming server-side root cause. Tracked in [cdot65/prisma-airs-sdk#162](https://github.com/cdot65/prisma-airs-sdk/issues/162) + [cdot65/prisma-airs-cli#80](https://github.com/cdot65/prisma-airs-cli/issues/80).
+
+Once the upstream is fixed, the full CRUD shape is documented in the per-resource pages:
+
+- [Data Patterns](../runtime/dlp/patterns.md) — full CRUD bodies for `create` / `replace` / `patch`
+- [Data Profiles](../runtime/dlp/profiles.md) — `expression_tree` + `multi_profile` rule examples
+- [Data Dictionaries](../runtime/dlp/dictionaries.md) — multipart `create` / `replace`
+- [Data Filtering Profiles](../runtime/dlp/filtering-profiles.md) — `replace` body shape
+
 ## Section E — Long-running workflows
 
 These tie multiple commands together. Each subsection is one end-to-end flow.
@@ -503,6 +643,9 @@ airs redteam targets delete <targetUuid> --force
 airs runtime topics revert --profile "<profileName>" --name "smoke-test-topic"
 airs runtime profiles delete "smoke-test-profile" --force --updated-by "$(git config user.email)"
 airs runtime api-keys delete "smoke-test-key"
+
+# 5. DLP — soft-archive any patterns created in D.8
+airs runtime dlp patterns delete <patternId>
 ```
 
 ## Section H — Interpretation guide
@@ -522,6 +665,7 @@ If a CLI command errors with `error: missing required argument` or unknown flag,
 - **`runtime scan-logs query`** may return `RESPONSE_VALIDATION: expected object, received undefined` on some tenants — the SDK's scan-logs response schema is too strict. SDK-side fix tracked.
 - **`redteam prompt-sets get`** prints the prompt-set detail successfully then errors with `Internal server error` because of a follow-up `getPromptSetVersionInfo` call. The primary data is correct — the second call is best-effort and currently 500s for some prompt sets. CLI-side soft-fail handling tracked.
 - **`runtime customer-apps get`** returns `403` when your client credentials don't have access to the app — that's a permission boundary, not a bug.
+- **`runtime dlp` GET-by-id + write mutations** — `GET /v2/api/data-patterns/{id}`, `GET /v2/api/data-profiles/{id}`, `POST /v2/api/data-profiles`, and `PATCH /v2/api/data-patterns/{id}` all return generic 400 from the upstream API. CLI/SDK are correct; server-side fix tracked in [sdk#162](https://github.com/cdot65/prisma-airs-sdk/issues/162) and [cli#80](https://github.com/cdot65/prisma-airs-cli/issues/80). See the mutation matrix in [D.8](#d8-runtime-dlp-writes-patterns-crud-profiles-read-only-by-upstream-constraint).
 
 ## When to run this
 

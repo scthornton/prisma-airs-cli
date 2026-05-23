@@ -72,6 +72,8 @@ nav:
       - Installation: getting-started/installation.md
       - Configuration: getting-started/configuration.md
       - Quick Start: getting-started/quick-start.md
+      - Full CLI Command Sweep: development/full-cli-sweep.md
+      - Live Smoke Tests: development/smoke-tests.md
   - Runtime Security:
       - Overview: runtime/overview.md
       - Prompt Scanning: runtime/scanning.md
@@ -127,8 +129,6 @@ nav:
   - Development:
       - Contributing: development/contributing.md
       - Testing: development/testing.md
-      - Live Smoke Tests: development/smoke-tests.md
-      - Full CLI Command Sweep: development/full-cli-sweep.md
       - Local Setup: development/local-setup.md
   - About:
       - Release Notes: about/release-notes.md
