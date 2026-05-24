@@ -470,25 +470,18 @@ airs model-security groups delete <groupUuid> --force
 DLP mutations have **partial coverage** on this tenant — patterns support CREATE + DELETE, but PATCH/REPLACE/GET-by-id and all profile/dictionary mutations currently return generic 400 from the upstream API. See the known-issue callout in B.4 and the matrix at the end of this section.
 
 ```bash
-# CREATE a custom pattern (works ✓)
-cat > pattern.json <<'EOF'
-{
-  "name": "cli-smoke-pattern",
-  "type": "custom",
-  "description": "throwaway smoke test pattern",
-  "detection_config": {
-    "technique": "regex",
-    "supported_confidence_levels": ["high", "low"]
-  },
-  "matching_rules": {
-    "delimiter": ";",
-    "proximity_distance": 200,
-    "regexes": [{ "regex": "SMOKE-TEST-[A-Z0-9]{8}", "weight": 1 }]
-  },
-  "tags": { "classification": ["smoke-test"] }
-}
-EOF
-airs runtime dlp patterns create --body-file pattern.json --output json
+# CREATE a custom pattern via structured flags (works ✓)
+airs runtime dlp patterns create \
+  --name "cli-smoke-pattern" \
+  --description "throwaway smoke test pattern" \
+  --confidence-levels "high,low" \
+  --delimiter ";" \
+  --proximity-distance 200 \
+  --regex "SMOKE-TEST-[A-Z0-9]{8}" \
+  --tag "classification=smoke-test" \
+  --output json
+
+# --body-file pattern.json is still accepted as an escape hatch for complex bodies.
 
 # Soft-DELETE (works ✓ — status flips to "deleted", still resolvable via list filtering)
 airs runtime dlp patterns delete <patternId>
