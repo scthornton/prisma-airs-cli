@@ -1,17 +1,48 @@
 import type { Command } from 'commander';
 import { SdkDataProfilesService } from '../../../airs/dlp/data-profiles.js';
 import { dlpProfiles, type OutputFormat, renderError } from '../../renderer/index.js';
+import { buildProfileBody, repeatable } from './build-body.js';
 import { buildMergePatch, parseBody } from './patch.js';
 
 function listFlags<T extends Command>(cmd: T): T {
   return cmd
     .option('--page <n>', 'Zero-indexed page number', (v) => Number.parseInt(v, 10))
     .option('--size <n>', 'Page size', (v) => Number.parseInt(v, 10))
-    .option('--sort <field,dir>', 'Sort criteria (repeatable)', (v, prev: string[] = []) => [
-      ...prev,
-      v,
-    ])
+    .option('--sort <field,dir>', 'Sort criteria (repeatable)', repeatable)
     .option('--output <fmt>', 'Output format', 'pretty');
+}
+
+function writeFlags<T extends Command>(cmd: T): T {
+  return cmd
+    .option('--name <s>', 'Profile name (required unless --body-file)')
+    .option('--profile-type <s>', 'Profile type: basic|advanced (default: advanced)')
+    .option('--description <s>', 'Description')
+    .option('--granular', 'Granular data profile')
+    .option(
+      '--pattern-id <id>',
+      'Data pattern ID to include (repeatable). Builds a simple expression_tree.',
+      repeatable,
+    )
+    .option(
+      '--combinator <op>',
+      'Combinator for --pattern-id: or|and|not|and_not|or_not (default: or)',
+    )
+    .option('--confidence <level>', 'Confidence level for --pattern-id leaves (default: high)')
+    .option('--body <json|->', 'Raw JSON body (escape hatch; or "-" for stdin)')
+    .option(
+      '--body-file <path>',
+      'Raw JSON body file (escape hatch; required for complex rule trees)',
+    )
+    .option('--output <fmt>', 'Output format', 'pretty');
+}
+
+async function resolveWriteBody(opts: Record<string, unknown>): Promise<unknown> {
+  if (opts.body || opts.bodyFile) {
+    const body = await parseBody({ body: opts.body as string, bodyFile: opts.bodyFile as string });
+    if (!body) throw new Error('--body or --body-file was empty');
+    return body;
+  }
+  return buildProfileBody(opts);
 }
 
 export function register(dlp: Command): void {
@@ -34,27 +65,19 @@ export function register(dlp: Command): void {
     }
   });
 
-  group
-    .command('create')
-    .description('Create a data profile')
-    .option('--body <json|->', 'JSON body (or "-" for stdin)')
-    .option('--body-file <path>', 'Path to JSON body file')
-    .option('--output <fmt>', 'Output format', 'pretty')
-    .action(async (opts) => {
-      try {
-        const body = await parseBody({ body: opts.body, bodyFile: opts.bodyFile });
-        if (!body) throw new Error('--body or --body-file is required');
-        const svc = new SdkDataProfilesService();
-        dlpProfiles.renderCreated(
-          // biome-ignore lint/suspicious/noExplicitAny: parseBody returns unknown, cast for create()
-          await svc.create(body as any),
-          opts.output as OutputFormat,
-        );
-      } catch (err) {
-        renderError(err instanceof Error ? err.message : String(err));
-        process.exit(2);
-      }
-    });
+  writeFlags(group.command('create').description('Create a data profile')).action(async (opts) => {
+    try {
+      const body = await resolveWriteBody(opts);
+      dlpProfiles.renderCreated(
+        // biome-ignore lint/suspicious/noExplicitAny: body shape verified by SDK Zod
+        await new SdkDataProfilesService().create(body as any),
+        opts.output as OutputFormat,
+      );
+    } catch (err) {
+      renderError(err instanceof Error ? err.message : String(err));
+      process.exit(2);
+    }
+  });
 
   group
     .command('get <id>')
@@ -72,18 +95,12 @@ export function register(dlp: Command): void {
       }
     });
 
-  group
-    .command('replace <id>')
-    .description('Full-replace a data profile (PUT)')
-    .option('--body <json|->', 'JSON body (or "-" for stdin)')
-    .option('--body-file <path>', 'Path to JSON body file')
-    .option('--output <fmt>', 'Output format', 'pretty')
-    .action(async (id, opts) => {
+  writeFlags(group.command('replace <id>').description('Full-replace a data profile (PUT)')).action(
+    async (id, opts) => {
       try {
-        const body = await parseBody({ body: opts.body, bodyFile: opts.bodyFile });
-        if (!body) throw new Error('--body or --body-file is required');
+        const body = await resolveWriteBody(opts);
         dlpProfiles.renderReplaced(
-          // biome-ignore lint/suspicious/noExplicitAny: parseBody returns unknown, cast for replace()
+          // biome-ignore lint/suspicious/noExplicitAny: body shape verified by SDK Zod
           await new SdkDataProfilesService().replace(id, body as any),
           opts.output as OutputFormat,
         );
@@ -91,7 +108,8 @@ export function register(dlp: Command): void {
         renderError(err instanceof Error ? err.message : String(err));
         process.exit(2);
       }
-    });
+    },
+  );
 
   group
     .command('patch <id>')
@@ -101,12 +119,8 @@ export function register(dlp: Command): void {
         'To force a string, quote: --set count=\'"5"\'.',
     )
     .option('--body-file <path>', 'JSON merge-patch body file')
-    .option('--set <k=v...>', 'Set scalar field (repeatable)', (v, p: string[] = []) => [...p, v])
-    .option(
-      '--clear <key...>',
-      'Clear field via merge-patch null (repeatable)',
-      (v, p: string[] = []) => [...p, v],
-    )
+    .option('--set <k=v...>', 'Set scalar field (repeatable)', repeatable)
+    .option('--clear <key...>', 'Clear field via merge-patch null (repeatable)', repeatable)
     .option('--output <fmt>', 'Output format', 'pretty')
     .action(async (id, opts) => {
       try {
@@ -136,9 +150,8 @@ This DLP API has no DELETE for data profiles.
 To soft-delete, fetch the profile to get its name + profile_type, then patch:
 
   airs runtime dlp profiles get ${id} --output json
-  airs runtime dlp profiles patch ${id} --body-file - <<EOF
-  { "name": "...", "profile_type": "...", "profile_status": "deleted" }
-  EOF
+  airs runtime dlp profiles patch ${id} --set profile_status='"deleted"' \\
+    --set name='"<existing-name>"' --set profile_type='"<existing-type>"'
 `);
       process.exit(2);
     });

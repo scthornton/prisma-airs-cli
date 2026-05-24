@@ -1,17 +1,42 @@
 import type { Command } from 'commander';
 import { SdkDataPatternsService } from '../../../airs/dlp/data-patterns.js';
 import { dlpPatterns, type OutputFormat, renderError } from '../../renderer/index.js';
+import { buildPatternBody, repeatable } from './build-body.js';
 import { buildMergePatch, parseBody } from './patch.js';
 
 function listFlags<T extends Command>(cmd: T): T {
   return cmd
     .option('--page <n>', 'Zero-indexed page number', (v) => Number.parseInt(v, 10))
     .option('--size <n>', 'Page size', (v) => Number.parseInt(v, 10))
-    .option('--sort <field,dir>', 'Sort criteria (repeatable)', (v, prev: string[] = []) => [
-      ...prev,
-      v,
-    ])
+    .option('--sort <field,dir>', 'Sort criteria (repeatable)', repeatable)
     .option('--output <fmt>', 'Output format', 'pretty');
+}
+
+function writeFlags<T extends Command>(cmd: T): T {
+  return cmd
+    .option('--name <s>', 'Pattern name (required unless --body-file)')
+    .option('--type <s>', 'Pattern type: predefined|custom|file_property (default: custom)')
+    .option('--description <s>', 'Pattern description')
+    .option('--technique <s>', 'Detection technique (default: regex)')
+    .option('--confidence-levels <csv>', 'Confidence levels CSV: e.g. high,low')
+    .option('--regex <pattern>', 'Regex with weight=1 (repeatable)', repeatable)
+    .option('--weighted-regex <PATTERN|N>', 'Regex with explicit weight (repeatable)', repeatable)
+    .option('--delimiter <s>', 'Delimiter for proximity matching')
+    .option('--proximity-distance <n>', 'Proximity window (2..1000)')
+    .option('--proximity-keyword <s>', 'Proximity keyword (repeatable)', repeatable)
+    .option('--tag <k=v>', 'Tag (repeatable, value can be CSV)', repeatable)
+    .option('--body <json|->', 'Raw JSON body (escape hatch; or "-" for stdin)')
+    .option('--body-file <path>', 'Raw JSON body file (escape hatch)')
+    .option('--output <fmt>', 'Output format', 'pretty');
+}
+
+async function resolveWriteBody(opts: Record<string, unknown>): Promise<unknown> {
+  if (opts.body || opts.bodyFile) {
+    const body = await parseBody({ body: opts.body as string, bodyFile: opts.bodyFile as string });
+    if (!body) throw new Error('--body or --body-file was empty');
+    return body;
+  }
+  return buildPatternBody(opts);
 }
 
 export function register(dlp: Command): void {
@@ -30,27 +55,19 @@ export function register(dlp: Command): void {
     }
   });
 
-  group
-    .command('create')
-    .description('Create a data pattern')
-    .option('--body <json|->', 'JSON body (or "-" for stdin)')
-    .option('--body-file <path>', 'Path to JSON body file')
-    .option('--output <fmt>', 'Output format', 'pretty')
-    .action(async (opts) => {
-      try {
-        const body = await parseBody({ body: opts.body, bodyFile: opts.bodyFile });
-        if (!body) throw new Error('--body or --body-file is required');
-        const svc = new SdkDataPatternsService();
-        dlpPatterns.renderCreated(
-          // biome-ignore lint/suspicious/noExplicitAny: parseBody returns unknown, cast for create()
-          await svc.create(body as any),
-          opts.output as OutputFormat,
-        );
-      } catch (err) {
-        renderError(err instanceof Error ? err.message : String(err));
-        process.exit(2);
-      }
-    });
+  writeFlags(group.command('create').description('Create a data pattern')).action(async (opts) => {
+    try {
+      const body = await resolveWriteBody(opts);
+      dlpPatterns.renderCreated(
+        // biome-ignore lint/suspicious/noExplicitAny: body shape verified by SDK Zod
+        await new SdkDataPatternsService().create(body as any),
+        opts.output as OutputFormat,
+      );
+    } catch (err) {
+      renderError(err instanceof Error ? err.message : String(err));
+      process.exit(2);
+    }
+  });
 
   group
     .command('get <id>')
@@ -68,18 +85,12 @@ export function register(dlp: Command): void {
       }
     });
 
-  group
-    .command('replace <id>')
-    .description('Full-replace a data pattern (PUT)')
-    .option('--body <json|->', 'JSON body (or "-" for stdin)')
-    .option('--body-file <path>', 'Path to JSON body file')
-    .option('--output <fmt>', 'Output format', 'pretty')
-    .action(async (id, opts) => {
+  writeFlags(group.command('replace <id>').description('Full-replace a data pattern (PUT)')).action(
+    async (id, opts) => {
       try {
-        const body = await parseBody({ body: opts.body, bodyFile: opts.bodyFile });
-        if (!body) throw new Error('--body or --body-file is required');
+        const body = await resolveWriteBody(opts);
         dlpPatterns.renderReplaced(
-          // biome-ignore lint/suspicious/noExplicitAny: parseBody returns unknown, cast for replace()
+          // biome-ignore lint/suspicious/noExplicitAny: body shape verified by SDK Zod
           await new SdkDataPatternsService().replace(id, body as any),
           opts.output as OutputFormat,
         );
@@ -87,7 +98,8 @@ export function register(dlp: Command): void {
         renderError(err instanceof Error ? err.message : String(err));
         process.exit(2);
       }
-    });
+    },
+  );
 
   group
     .command('patch <id>')
@@ -97,12 +109,8 @@ export function register(dlp: Command): void {
         'To force a string, quote: --set count=\'"5"\'.',
     )
     .option('--body-file <path>', 'JSON merge-patch body file')
-    .option('--set <k=v...>', 'Set scalar field (repeatable)', (v, p: string[] = []) => [...p, v])
-    .option(
-      '--clear <key...>',
-      'Clear field via merge-patch null (repeatable)',
-      (v, p: string[] = []) => [...p, v],
-    )
+    .option('--set <k=v...>', 'Set scalar field (repeatable)', repeatable)
+    .option('--clear <key...>', 'Clear field via merge-patch null (repeatable)', repeatable)
     .option('--output <fmt>', 'Output format', 'pretty')
     .action(async (id, opts) => {
       try {
