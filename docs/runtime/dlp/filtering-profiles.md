@@ -38,7 +38,7 @@ airs runtime dlp filtering-profiles list --sort name,asc --output json
       "version": 1
     }
   ],
-  "page": { "number": 0, "size": 25, "total": null, "returned": 1 }
+  "page": { "number": 0, "size": 25, "total": 29, "returned": 1 }
 }
 ```
 

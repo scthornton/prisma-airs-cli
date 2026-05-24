@@ -27,7 +27,7 @@ airs runtime dlp dictionaries list --page 0 --size 50 --output json
 airs runtime dlp dictionaries list --keywords  # Include keyword array in output
 ```
 
-**Output (`--output json`)** — curated `{items, page}` projection:
+**Output (`--output json`)** — curated `{items, page}` projection. `status`, `keywords`, and `version` are omitted from JSON when undefined (typical for predefined entries):
 
 ```json
 {
@@ -35,20 +35,14 @@ airs runtime dlp dictionaries list --keywords  # Include keyword array in output
     {
       "id": "6901...",
       "name": "Bank Names",
-      "type": "predefined",
-      "status": null,
-      "keywords": null,
-      "version": null
+      "type": "predefined"
     }
   ],
-  "page": { "number": 0, "size": 25, "total": null, "returned": 1 }
+  "page": { "number": 0, "size": 25, "total": 32, "returned": 1 }
 }
 ```
 
-Use `get <id>` (with `--keywords` to include the keyword array) for nested fields (`description`, `category`, `region_name`, `is_case_sensitive`, `detection_technique`, `dictionary_metadata`, `tags`, `audit_metadata`).
-
-!!! note
-    `keywords` is `null` unless `--keywords` is passed.
+Custom entries with status/version populated include those fields. The `keywords` field shows the count (not the array) when the underlying entry has a populated keyword list. Use `get <id> --keywords` for the full keyword list and other nested fields (`description`, `category`, `region_name`, `is_case_sensitive`, `detection_technique`, `dictionary_metadata`, `tags`, `audit_metadata`).
 
 ## create
 
@@ -88,6 +82,9 @@ Flag reference:
 | `--include-keywords` | Echo parsed `keywords[]` in response |
 
 **Output (`--output json`)** — curated ack `{action: "created", id, name, type, status, version}`. Add `--include-keywords` to attach the parsed keyword list to the underlying SDK response (visible via `get <id> --keywords --output json` after create).
+
+!!! warning "Known upstream issue (2026-05-24)"
+    The DLP API currently returns generic HTTP 400 on `POST /v2/api/dictionaries` against live tenants. The CLI builds a correctly-formed multipart request — reproducible failure is server-side. Tracked in [cdot65/prisma-airs-sdk#162](https://github.com/cdot65/prisma-airs-sdk/issues/162) / [cdot65/prisma-airs-cli#80](https://github.com/cdot65/prisma-airs-cli/issues/80).
 
 ## get
 

@@ -48,7 +48,7 @@ airs runtime dlp patterns list --page 0 --size 50 --sort name,asc --output json
       "version": 1
     }
   ],
-  "page": { "number": 0, "size": 25, "total": null, "returned": 2 }
+  "page": { "number": 0, "size": 25, "total": 1123, "returned": 2 }
 }
 ```
 

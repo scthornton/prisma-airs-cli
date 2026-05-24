@@ -39,7 +39,7 @@ airs runtime dlp profiles list --page 0 --size 50 --sort name,asc --output json
       "version": 1
     }
   ],
-  "page": { "number": 0, "size": 25, "total": null, "returned": 1 }
+  "page": { "number": 0, "size": 25, "total": 30, "returned": 1 }
 }
 ```
 
