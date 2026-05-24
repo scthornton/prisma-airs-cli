@@ -87,10 +87,7 @@ Flag reference:
 | `--metadata-file <path>` | JSON metadata file (overrides flat flags) |
 | `--include-keywords` | Echo parsed `keywords[]` in response |
 
-**Output** — created dictionary with server-assigned `id`. If `--include-keywords`, the parsed entries are included.
-
-!!! note
-    The `create` action currently always renders in `pretty` format. Use `get <id> --output json` to retrieve a JSON-shaped record after create.
+**Output (`--output json`)** — curated ack `{action: "created", id, name, type, status, version}`. Add `--include-keywords` to attach the parsed keyword list to the underlying SDK response (visible via `get <id> --keywords --output json` after create).
 
 ## get
 
