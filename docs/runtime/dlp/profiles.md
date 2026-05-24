@@ -25,170 +25,117 @@ airs runtime dlp profiles list
 airs runtime dlp profiles list --page 0 --size 50 --sort name,asc --output json
 ```
 
-**Output** — Spring `Page<>` envelope; example showing a `multi_profile` entry (server returns the composed pattern set echoed in `advance_data_patterns_rule_request`):
+**Output (`--output json`)** — curated `{items, page}` projection:
 
 ```json
 {
-  "content": [
+  "items": [
     {
       "id": "1234567890",
       "name": "EU-Regulated (umbrella)",
-      "description": null,
-      "tenant_id": "<TENANT_ID>",
       "type": "custom",
-      "profile_status": "active",
       "profile_type": "advanced",
-      "is_granular_data_profile": false,
-      "is_parent_managed": false,
-      "version": 1,
-      "advance_data_patterns_rule_request": [
-        "(... server-rendered detection expression, truncated ...)"
-      ],
-      "detection_rules": [
-        {
-          "rule_type": "multi_profile",
-          "multi_profile": {
-            "data_profile_ids": [1234567891, 1234567892, 1234567893],
-            "operator_type": "or"
-          }
-        }
-      ],
-      "audit_metadata": {
-        "created_at": 1779473698140,
-        "created_by": "Strata Cloud Manager",
-        "updated_at": 1779473698140,
-        "updated_by": "Strata Cloud Manager"
-      }
+      "status": "active",
+      "version": 1
     }
   ],
-  "pageable": { "page_number": 0, "page_size": 25, "offset": 0, "paged": true, "unpaged": false },
-  "first": true,
-  "last": false,
-  "size": 25,
-  "number": 0,
-  "number_of_elements": 25,
-  "empty": false,
-  "totalElements": null,
-  "totalPages": null
+  "page": { "number": 0, "size": 25, "total": null, "returned": 1 }
 }
 ```
 
-Example `expression_tree` entry (truncated to one leaf for brevity — real responses nest several layers of `sub_expressions`):
-
-```json
-{
-  "id": "1234567890",
-  "name": "InfoSec - Code Assistant - Strict",
-  "profile_type": "advanced",
-  "version": 5,
-  "detection_rules": [
-    {
-      "rule_type": "expression_tree",
-      "expression_tree": {
-        "operator_type": "or",
-        "rule_item": null,
-        "sub_expressions": [
-          {
-            "operator_type": null,
-            "rule_item": {
-              "detection_technique": "regex",
-              "id": "6900...",
-              "name": "Bank - ABA Routing Number",
-              "version": 1,
-              "by_unique_count": false,
-              "confidence_level": "low",
-              "supported_confidence_levels": ["high", "low"],
-              "occurrence_operator_type": "any"
-            },
-            "sub_expressions": []
-          }
-        ]
-      }
-    }
-  ]
-}
-```
+Use `get <id>` for nested fields (`detection_rules` with `expression_tree` or `multi_profile`, `audit_metadata`, server-rendered `advance_data_patterns_rule_request`).
 
 !!! note "Nullable fields"
-    The `expression_tree` is recursive and many nodes legitimately carry `null` values — particularly `operator_type`, `rule_item`, and (at intermediate nodes) `sub_expressions` slots. CLI requires `@cdot65/prisma-airs-sdk@^0.9.2` or newer to parse this surface; older SDK pins fail Zod validation on real responses.
+    Underlying API `expression_tree` responses are recursive — many nodes carry `null` for `operator_type`, `rule_item`, or `sub_expressions`. CLI requires `@cdot65/prisma-airs-sdk@^0.9.2` or newer to parse them.
 
 ## create
 
-Create a new data profile with `expression_tree` or `multi_profile` rules. Required fields: `name`, `detection_rules`.
+`--name` is required. `--profile-type` defaults to `advanced`. For the common case — a flat boolean of pattern IDs — pass `--pattern-id <id>` repeatedly and (optionally) `--combinator and|or|not|and_not|or_not` (default `or`):
 
-### Example: expression_tree (AND logic)
+```bash
+airs runtime dlp profiles create \
+  --name "High-risk PII (SSN OR CC)" \
+  --description "Fires on SSN or CC pattern leaves" \
+  --pattern-id 6990111aaa \
+  --pattern-id 6990222bbb \
+  --combinator or \
+  --confidence high \
+  --output json
+```
 
-Create a file `profile-expr.json`:
+Flag reference:
+
+| Flag | Notes |
+|------|-------|
+| `--name <s>` | Required (unless `--body-file`) |
+| `--profile-type <s>` | `basic` or `advanced` (default `advanced`) |
+| `--description <s>` | Optional |
+| `--granular` | Mark as granular data profile |
+| `--pattern-id <id>` | Repeatable; each becomes a leaf in `expression_tree.condition_pattern[]` |
+| `--combinator <op>` | `or` (default), `and`, `not`, `and_not`, `or_not` |
+| `--confidence <level>` | Leaf confidence (default `high`) |
+
+**Output (`--output json`)** — curated ack:
 
 ```json
 {
+  "action": "created",
+  "id": "1234567890",
+  "name": "High-risk PII (SSN OR CC)",
+  "type": "custom",
+  "status": "active",
+  "version": 1
+}
+```
+
+### Escape hatch — `--body-file` for complex rules
+
+For nested `expression_tree` (AND-of-ORs etc.) or `multi_profile` composition, pass JSON:
+
+```bash
+# expression_tree with AND of two sub-rules
+cat > profile-expr.json <<'EOF'
+{
   "name": "High-risk PII (SSN AND CC)",
-  "description": "Fires only when both SSN and CC pattern leaves match",
+  "profile_type": "advanced",
   "detection_rules": [
     {
       "rule_type": "expression_tree",
       "expression_tree": {
         "operator_type": "and",
         "sub_expressions": [
-          {
-            "rule_item": {
-              "detection_technique": "regex",
-              "match_type": "include",
-              "confidence_level": "high",
-              "occurrence_operator_type": "more_than_equal_to",
-              "occurrence_count": 1
-            }
-          },
-          {
-            "rule_item": {
-              "detection_technique": "weighted_regex",
-              "match_type": "include",
-              "confidence_level": "high",
-              "occurrence_operator_type": "more_than_equal_to",
-              "occurrence_count": 1
-            }
-          }
+          { "rule_item": { "detection_technique": "regex", "match_type": "include",
+                           "confidence_level": "high",
+                           "occurrence_operator_type": "more_than_equal_to",
+                           "occurrence_count": 1 } },
+          { "rule_item": { "detection_technique": "weighted_regex", "match_type": "include",
+                           "confidence_level": "high",
+                           "occurrence_operator_type": "more_than_equal_to",
+                           "occurrence_count": 1 } }
         ]
       }
     }
   ]
 }
-```
-
-Then invoke create:
-
-```bash
-airs runtime dlp profiles create --body-file profile-expr.json
+EOF
 airs runtime dlp profiles create --body-file profile-expr.json --output json
-```
 
-### Example: multi_profile (OR composition)
-
-Create a file `profile-multi.json`:
-
-```json
+# multi_profile composition
+cat > profile-multi.json <<'EOF'
 {
   "name": "EU-Regulated (umbrella)",
-  "description": "GDPR-PII OR EU-Healthcare",
+  "profile_type": "advanced",
   "detection_rules": [
-    {
-      "rule_type": "multi_profile",
-      "multi_profile": {
-        "operator_type": "or",
-        "data_profile_ids": [1234567891, 1234567892]
-      }
-    }
+    { "rule_type": "multi_profile",
+      "multi_profile": { "operator_type": "or",
+                         "data_profile_ids": [1234567891, 1234567892] } }
   ]
 }
-```
-
-Then invoke create:
-
-```bash
+EOF
 airs runtime dlp profiles create --body-file profile-multi.json --output json
 ```
 
-**Output** — created profile with server-assigned `id`, `profile_status: 'active'`, `version: 1`, and `audit_metadata`. Multi-profile compositions auto-promote `profile_type` to `'advanced'`.
+Multi-profile compositions auto-promote `profile_type` to `advanced`.
 
 ## get
 
@@ -206,83 +153,50 @@ airs runtime dlp profiles get 1234567890 --output json
 
 ## replace
 
-Perform a full PUT to update a profile. The entire body is treated as the desired state.
-
-Create a file `profile-update.json` with all required fields:
-
-```json
-{
-  "name": "High-risk PII (SSN AND CC)",
-  "description": "Updated: requires both SSN and CC with high confidence",
-  "detection_rules": [
-    {
-      "rule_type": "expression_tree",
-      "expression_tree": {
-        "operator_type": "and",
-        "sub_expressions": [
-          {
-            "rule_item": {
-              "detection_technique": "regex",
-              "match_type": "include",
-              "confidence_level": "high",
-              "occurrence_operator_type": "more_than_equal_to",
-              "occurrence_count": 1
-            }
-          },
-          {
-            "rule_item": {
-              "detection_technique": "weighted_regex",
-              "match_type": "include",
-              "confidence_level": "high",
-              "occurrence_operator_type": "more_than_equal_to",
-              "occurrence_count": 2
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-Then invoke replace:
+Full PUT. Same flags as `create`, plus `--body-file` for complex rule trees:
 
 ```bash
-airs runtime dlp profiles replace 1234567890 --body-file profile-update.json
+# Simple flat pattern boolean
+airs runtime dlp profiles replace 1234567890 \
+  --name "High-risk PII (SSN OR CC)" \
+  --pattern-id 6990111aaa --pattern-id 6990222bbb \
+  --combinator or --confidence high \
+  --output json
+
+# Complex tree
 airs runtime dlp profiles replace 1234567890 --body-file profile-update.json --output json
 ```
 
-**Output** — updated profile with incremented version and refreshed `audit_metadata`.
+**Output (`--output json`)** — curated ack `{action: "replaced", id, name, type, status, version}` with incremented version.
 
 ## patch
 
-Use JSON Merge Patch to update only specified fields. Required fields even on patch: `name` and `profile_type`. Other fields use nullable semantics: omit to leave unchanged, send `null` to clear.
-
-Create a file `profile-patch.json`:
-
-```json
-{
-  "name": "High-risk PII (SSN AND CC)",
-  "profile_type": "advanced",
-  "description": "Patched description without touching detection_rules"
-}
-```
-
-Then invoke patch:
+JSON Merge Patch. Required fields even on patch: `name` and `profile_type` — include via `--set` if patching anything else. Use `--set/--clear` for scalars, `--body-file` for nested rules.
 
 ```bash
-airs runtime dlp profiles patch 1234567890 --body-file profile-patch.json
-airs runtime dlp profiles patch 1234567890 --body-file profile-patch.json --output json
+# Patch description without touching detection_rules
+airs runtime dlp profiles patch 1234567890 \
+  --set name='"High-risk PII (SSN AND CC)"' \
+  --set profile_type='"advanced"' \
+  --set description='"Patched description"'
+
+# Soft-delete via profile_status
+airs runtime dlp profiles patch 1234567890 \
+  --set name='"High-risk PII"' \
+  --set profile_type='"advanced"' \
+  --set profile_status='"deleted"'
 ```
 
-**Output** — patched profile with only the specified fields updated; detection rules preserved as-is.
+`--body-file` is mutually exclusive with `--set/--clear`. Values are coerced (numbers, booleans, `null`, JSON literals). Quote to force strings: `--set count='"5"'`.
+
+**Output (`--output json`)** — curated ack `{action: "patched", id, name, type, status, version}`.
 
 ## Tips
 
 - **Expression tree nesting**: Build complex detection logic using `and` / `or` operators with nested `sub_expressions` and leaf `rule_item` nodes. Each leaf carries the detection technique and technique-specific thresholds.
 - **Multi-profile composition**: Use `multi_profile` to combine multiple existing profiles with a single operator (`and` or `or`). The composed profile auto-promotes to `profile_type: 'advanced'` server-side.
 - **Merge Patch semantics**: On PATCH, `name` and `profile_type` are required. Arrays like `detection_rules` are replaced wholesale if sent; omit to preserve. Send `null` to clear optional fields like `description`.
-- **No DELETE**: Profiles cannot be deleted via API. To archive, PATCH with `profile_status: 'deleted'` if the API supports it, or use the Strata Cloud Manager UI.
+- **No DELETE**: Profiles cannot be deleted via API. To archive, PATCH with `--set profile_status='"deleted"'` (must also include `--set name=...` and `--set profile_type=...`), or use the Strata Cloud Manager UI.
 
 ## See also
 

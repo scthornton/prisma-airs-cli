@@ -27,89 +27,70 @@ airs runtime dlp dictionaries list --page 0 --size 50 --output json
 airs runtime dlp dictionaries list --keywords  # Include keyword array in output
 ```
 
-**Output** — Spring `Page<>` envelope (`totalElements`/`totalPages` are emitted as `null` by this endpoint); example with one predefined entry:
+**Output (`--output json`)** — curated `{items, page}` projection:
 
 ```json
 {
-  "content": [
+  "items": [
     {
       "id": "6901...",
       "name": "Bank Names",
-      "description": "List of large international banks",
-      "category": "Finance",
-      "region_name": "GLOBAL",
       "type": "predefined",
-      "is_case_sensitive": false,
-      "is_parent_managed": false,
-      "detection_technique": "dictionary",
-      "detection_sub_technique": null,
-      "dictionary_metadata": {
-        "number_of_keywords": 0,
-        "original_file_name": "",
-        "original_file_size_in_byte": 0
-      },
+      "status": null,
       "keywords": null,
-      "tags": { "classification": ["pab"] },
-      "attributes": null,
-      "audit_metadata": {
-        "created_at": 1761657319491,
-        "created_by": "System",
-        "updated_at": 1761657319491,
-        "updated_by": "System"
-      }
+      "version": null
     }
   ],
-  "pageable": { "page_number": 0, "page_size": 25, "offset": 0, "paged": true, "unpaged": false },
-  "first": true,
-  "last": false,
-  "size": 25,
-  "number": 0,
-  "number_of_elements": 25,
-  "empty": false,
-  "totalElements": null,
-  "totalPages": null
+  "page": { "number": 0, "size": 25, "total": null, "returned": 1 }
 }
 ```
 
+Use `get <id>` (with `--keywords` to include the keyword array) for nested fields (`description`, `category`, `region_name`, `is_case_sensitive`, `detection_technique`, `dictionary_metadata`, `tags`, `audit_metadata`).
+
 !!! note
-    `keywords` is `null` unless `--keywords` is passed. `detection_sub_technique`, `attributes`, and the `audit_metadata.created_by`/`updated_by` slots are commonly `null` on predefined entries.
+    `keywords` is `null` unless `--keywords` is passed.
 
 ## create
 
-Create a new dictionary. Requires multipart: metadata JSON + keyword file (newline-delimited text).
+Multipart upload — keyword file + metadata. Pass metadata via flat flags (preferred) or `--metadata-file`. `--file` is required.
 
-First, create the keyword file `codenames.txt`:
-
-```
+```bash
+# Keyword file (newline-delimited)
+cat > codenames.txt <<'EOF'
 alpha
 bravo
 charlie
 delta
 echo
+EOF
+
+# Flag-based metadata (preferred)
+airs runtime dlp dictionaries create \
+  --name "project-codenames" \
+  --category Confidential \
+  --region us-west-2 \
+  --description "Internal project codenames — phonetic alphabet" \
+  --file codenames.txt \
+  --include-keywords
 ```
 
-Then create the metadata file `dict-meta.json`:
+Flag reference:
 
-```json
-{
-  "category": "Confidential",
-  "name": "project-codenames",
-  "original_file_name": "codenames.txt",
-  "region_name": "us-west-2",
-  "description": "Internal project codenames — phonetic alphabet",
-  "is_case_sensitive": false
-}
-```
+| Flag | Notes |
+|------|-------|
+| `--file <path>` | **Required** — keyword file (newline-delimited) |
+| `--name <s>` | Dictionary name |
+| `--category <s>` | `Academic`, `Confidential`, `Employment`, `Financial`, `Government`, `Healthcare`, `Legal`, `Marketing`, `Source Code` |
+| `--region <s>` | Region (e.g. `us-west-2`, `GLOBAL`) |
+| `--description <s>` | Optional |
+| `--classification <s>` | Tag value (becomes `tags.classification`) |
+| `--metadata-file <path>` | JSON metadata file (overrides flat flags) |
+| `--include-keywords` | Echo parsed `keywords[]` in response |
 
-Then invoke create:
+**Output** — created dictionary with server-assigned `id`. If `--include-keywords`, the parsed entries are included.
 
-```bash
-airs runtime dlp dictionaries create --metadata-file dict-meta.json --file-path codenames.txt
-airs runtime dlp dictionaries create --metadata-file dict-meta.json --file-path codenames.txt --output json
-airs runtime dlp dictionaries create --metadata-file dict-meta.json --file-path codenames.txt --keywords
-```
-
-**Output** — created dictionary with server-assigned `id` and lifecycle stamps. If `--keywords` is passed, the `keywords[]` array is included showing all parsed entries.
+!!! note
+    The `create` action currently always renders in `pretty` format. Use `get <id> --output json` to retrieve a JSON-shaped record after create.
 
 ## get
 
@@ -156,64 +137,40 @@ Note `dictionary_metadata.number_of_keywords` reflects the canonical server-side
 
 ## replace
 
-Perform a full multipart replace of both metadata and keyword file. The API may return 200+body (some regions) or 204+empty (others).
-
-Create updated metadata `dict-meta-v2.json`:
-
-```json
-{
-  "category": "Confidential",
-  "name": "project-codenames",
-  "original_file_name": "codenames.txt",
-  "region_name": "us-west-2",
-  "description": "Internal project codenames — updated",
-  "is_case_sensitive": false
-}
-```
-
-Create updated keyword file `codenames-v2.txt`:
-
-```
-alpha
-bravo
-charlie
-delta
-echo
-foxtrot
-```
-
-Then invoke replace:
+Full multipart replace of metadata + keyword file. Same flag set as `create`. The API returns 200+body in some regions, 204+empty in others — the CLI handles both.
 
 ```bash
-airs runtime dlp dictionaries replace 6901... --metadata-file dict-meta-v2.json --file-path codenames-v2.txt
-airs runtime dlp dictionaries replace 6901... --metadata-file dict-meta-v2.json --file-path codenames-v2.txt --output json
+airs runtime dlp dictionaries replace 6901... \
+  --name "project-codenames" \
+  --category Confidential \
+  --region us-west-2 \
+  --description "Internal project codenames — updated" \
+  --file codenames-v2.txt \
+  --output json
 ```
 
-**Output** — updated dictionary with incremented keyword count and refreshed `audit_metadata`. If the API returns 204, the output is empty; always re-fetch with `get --keywords` to canonically observe state.
+**Output (`--output json`)** — curated ack `{action: "replaced", id, name, type, status, version}` on 200; `replaced <id> (state not echoed by region)` on 204. After replace, re-fetch via `get --keywords` to canonically observe state.
 
 ## patch
 
-Use JSON Merge Patch to update only metadata fields. Required fields even on patch: `category`, `name`, `original_file_name`. Other fields use nullable semantics: omit to leave unchanged, send `null` to clear.
-
-Create a patch file `dict-patch.json`:
-
-```json
-{
-  "category": "Confidential",
-  "name": "project-codenames-v2",
-  "original_file_name": "codenames.txt",
-  "description": null
-}
-```
-
-Then invoke patch:
+JSON Merge Patch. Required fields even on patch: `category`, `name`, `original_file_name` — include via `--set` whenever patching anything else. `--set/--clear` values are coerced (numbers, booleans, `null`, JSON literals); quote to force strings: `--set count='"5"'`.
 
 ```bash
-airs runtime dlp dictionaries patch 6901... --body-file dict-patch.json
+# Rename and clear description
+airs runtime dlp dictionaries patch 6901... \
+  --set name='"project-codenames-v2"' \
+  --set category='"Confidential"' \
+  --set original_file_name='"codenames.txt"' \
+  --clear description \
+  --output json
+
+# Or via --body-file for arbitrary metadata
 airs runtime dlp dictionaries patch 6901... --body-file dict-patch.json --output json
 ```
 
-**Output** — patched dictionary with `description` cleared (omitted from response) and the new name persisted. Keywords are not affected by PATCH — use REPLACE to change the keyword file.
+`--body-file` is mutually exclusive with `--set/--clear`. Keywords are not affected by PATCH — use REPLACE to change the keyword file.
+
+**Output (`--output json`)** — curated ack `{action: "patched", id, name, type, status, version}`.
 
 ## delete
 
