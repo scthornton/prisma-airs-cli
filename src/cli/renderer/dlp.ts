@@ -100,7 +100,7 @@ function toKey(label: string): string {
 }
 
 function emitDetail(
-  item: Any,
+  _item: Any,
   fmt: OutputFormat,
   fields: { label: string; value: string | number | undefined }[],
   title: string,

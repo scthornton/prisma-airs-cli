@@ -48,18 +48,24 @@ describe('buildPatternBody', () => {
 
   it('weighted-regex splits on LAST pipe', () => {
     const body = buildPatternBody({ name: 'X', weightedRegex: ['A|B|3'] });
-    expect((body.matching_rules as { regexes: { regex: string; weight: number }[] }).regexes[0]).toEqual({
+    expect(
+      (body.matching_rules as { regexes: { regex: string; weight: number }[] }).regexes[0],
+    ).toEqual({
       regex: 'A|B',
       weight: 3,
     });
   });
 
   it('weighted-regex rejects missing pipe', () => {
-    expect(() => buildPatternBody({ name: 'X', weightedRegex: ['NOPIPE'] })).toThrow(/PATTERN\|weight/);
+    expect(() => buildPatternBody({ name: 'X', weightedRegex: ['NOPIPE'] })).toThrow(
+      /PATTERN\|weight/,
+    );
   });
 
   it('weighted-regex rejects non-numeric weight', () => {
-    expect(() => buildPatternBody({ name: 'X', weightedRegex: ['ABC|nope'] })).toThrow(/weight invalid/);
+    expect(() => buildPatternBody({ name: 'X', weightedRegex: ['ABC|nope'] })).toThrow(
+      /weight invalid/,
+    );
   });
 
   it('parses confidence-levels CSV', () => {
@@ -160,7 +166,9 @@ describe('buildProfileBody', () => {
 
   it('builds expression_tree from --pattern-id with default OR combinator', () => {
     const body = buildProfileBody({ name: 'X', patternId: ['p1', 'p2'] });
-    const rules = (body.detection_rules as { rule_type: string; expression_tree: { operator_type: string } }[])[0];
+    const rules = (
+      body.detection_rules as { rule_type: string; expression_tree: { operator_type: string } }[]
+    )[0];
     expect(rules.rule_type).toBe('expression_tree');
     expect(rules.expression_tree.operator_type).toBe('or');
   });
