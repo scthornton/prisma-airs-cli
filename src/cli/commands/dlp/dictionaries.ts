@@ -65,6 +65,7 @@ export function register(dlp: Command): void {
     .option('--file <path>', 'Keyword file')
     .option('--metadata-file <path>', 'JSON metadata file (overrides --name/--category/...)')
     .option('--include-keywords', 'Include keywords in response')
+    .option('--output <fmt>', 'Output format', 'pretty')
     .action(async (opts) => {
       try {
         const metadata = await buildMetadata(opts);
@@ -75,7 +76,7 @@ export function register(dlp: Command): void {
           file,
           includeKeywords: opts.includeKeywords,
         });
-        dlpDictionaries.renderCreated(r, 'pretty');
+        dlpDictionaries.renderCreated(r, opts.output as OutputFormat);
       } catch (err) {
         renderError(err instanceof Error ? err.message : String(err));
         process.exit(2);

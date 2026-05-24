@@ -26,115 +26,96 @@ airs runtime dlp patterns list
 airs runtime dlp patterns list --page 0 --size 50 --sort name,asc --output json
 ```
 
-**Output** — Spring `Page<>` envelope; example showing both `custom` and `predefined` entries (`totalElements`/`totalPages` are emitted as `null` by this endpoint):
+**Output (`--output json`)** — curated `{items, page}` projection (not the raw SDK envelope):
 
 ```json
 {
-  "content": [
+  "items": [
     {
       "id": "6990...",
       "name": "IPv4",
-      "description": "Just a simple test",
-      "tenant_id": "<TENANT_ID>",
       "type": "custom",
       "status": "active",
-      "license_type": "standard",
-      "is_parent_managed": false,
-      "version": 1,
-      "detection_config": {
-        "technique": "regex",
-        "supported_confidence_levels": ["high", "low"]
-      },
-      "matching_rules": {
-        "delimiter": ";",
-        "proximity_distance": 200,
-        "proximity_keywords": null,
-        "regexes": [
-          {
-            "regex": "\\b(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)(?:\\.(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3}\\b",
-            "weight": 1
-          }
-        ],
-        "metadata_criteria": null
-      },
-      "tags": { "classification": ["pab"] },
-      "audit_metadata": {
-        "created_at": 1771088671081,
-        "created_by": "Strata Cloud Manager",
-        "updated_at": 1771088671081,
-        "updated_by": "Strata Cloud Manager"
-      }
+      "technique": "regex",
+      "version": 1
     },
     {
       "id": "6900...",
       "name": "Passport - Australia",
       "type": "predefined",
       "status": "disabled",
-      "license_type": "standard",
-      "version": 1,
-      "detection_config": { "technique": "regex", "supported_confidence_levels": ["high"] },
-      "matching_rules": {
-        "delimiter": null,
-        "proximity_keywords": ["passport", "passport no"],
-        "regexes": [{ "regex": "...", "weight": 1 }],
-        "metadata_criteria": null
-      }
+      "technique": "regex",
+      "version": 1
     }
   ],
-  "pageable": { "page_number": 0, "page_size": 25, "offset": 0, "paged": true, "unpaged": false },
-  "first": true,
-  "last": false,
-  "size": 25,
-  "number": 0,
-  "number_of_elements": 25,
-  "empty": false,
-  "totalElements": null,
-  "totalPages": null
+  "page": { "number": 0, "size": 25, "total": 1123, "returned": 2 }
 }
 ```
 
+`pretty` and `table` formats render columns ID, Name, Type, Status, Technique, Version. Use `get <id>` for full nested fields (`detection_config`, `matching_rules`, `tags`, `audit_metadata`).
+
 !!! note "Nullable fields"
-    Real responses include several `null` values on `matching_rules` nested fields — `delimiter`, `proximity_keywords`, `regexes`, `metadata_criteria` are each independently nullable depending on the detection technique. CLI requires `@cdot65/prisma-airs-sdk@^0.9.2` or newer to parse this surface; older SDK pins fail Zod validation.
+    Underlying API responses include `null` values on `matching_rules` nested fields — `delimiter`, `proximity_keywords`, `regexes`, `metadata_criteria` are each independently nullable depending on the detection technique. CLI requires `@cdot65/prisma-airs-sdk@^0.9.2` or newer to parse this surface; older SDK pins fail Zod validation.
 
 ## create
 
-Create a new data pattern. Required fields: `name`, `type`, `detection_config`.
+Create a new data pattern using structured CLI flags (`--name` is the only required flag; `--type` defaults to `custom`, `--technique` defaults to `regex`):
 
-Create a file `pattern.json`:
+```bash
+airs runtime dlp patterns create \
+  --name "cc-numbers-weighted" \
+  --description "Credit-card numbers, weighted by proximity to card-related keywords" \
+  --technique weighted_regex \
+  --confidence-levels "low,medium,high" \
+  --proximity-distance 30 \
+  --proximity-keyword card --proximity-keyword credit \
+  --proximity-keyword visa --proximity-keyword mastercard --proximity-keyword amex \
+  --weighted-regex "\\b\\d{16}\\b|1.0" \
+  --weighted-regex "\\b\\d{15}\\b|0.8" \
+  --tag "classification=PCI" \
+  --tag "compliance=PCI-DSS-3.2.1" \
+  --tag "geography=US,EU" \
+  --output json
+```
+
+Flag reference:
+
+| Flag | Notes |
+|------|-------|
+| `--name <s>` | Required (unless `--body-file`) |
+| `--type <s>` | `predefined`, `custom`, `file_property` (default `custom`) |
+| `--description <s>` | Optional |
+| `--technique <s>` | Detection technique (default `regex`) |
+| `--confidence-levels <csv>` | e.g. `high,low` |
+| `--regex <pattern>` | Repeatable, weight=1 |
+| `--weighted-regex <PATTERN\|N>` | Repeatable; splits on LAST `\|` so the pattern may contain pipes |
+| `--delimiter <s>` | For proximity matching |
+| `--proximity-distance <n>` | 2..1000 |
+| `--proximity-keyword <s>` | Repeatable |
+| `--tag <k=v>` | Repeatable; value may be CSV (`classification=pab,endpoint`) |
+
+**Output (`--output json`)** — curated ack:
 
 ```json
 {
+  "action": "created",
+  "id": "6a12...",
   "name": "cc-numbers-weighted",
   "type": "custom",
-  "description": "Credit-card numbers, weighted by proximity to card-related keywords",
-  "detection_config": {
-    "technique": "weighted_regex",
-    "supported_confidence_levels": ["low", "medium", "high"]
-  },
-  "matching_rules": {
-    "proximity_distance": 30,
-    "proximity_keywords": ["card", "credit", "visa", "mastercard", "amex"],
-    "regexes": [
-      { "regex": "\\b\\d{16}\\b", "weight": 1.0 },
-      { "regex": "\\b\\d{15}\\b", "weight": 0.8 }
-    ]
-  },
-  "tags": {
-    "classification": ["PCI"],
-    "compliance": ["PCI-DSS-3.2.1"],
-    "geography": ["US", "EU"]
-  }
+  "status": "active",
+  "version": 1
 }
 ```
 
-Then invoke create:
+### Escape hatch — `--body-file`
+
+For shapes the flags don't cover (e.g. unusual `metadata_criteria` on `matching_rules`), pass a JSON file:
 
 ```bash
-airs runtime dlp patterns create --body-file pattern.json
 airs runtime dlp patterns create --body-file pattern.json --output json
 ```
 
-**Output** — created pattern with server-assigned `id`, `status: 'active'`, `version: 1`, and `audit_metadata`.
+Body shape matches the API request — `{ name, type, detection_config, matching_rules, tags }`.
 
 ## get
 
@@ -152,79 +133,46 @@ airs runtime dlp patterns get 6990... --output json
 
 ## replace
 
-Perform a full PUT to update a pattern. The entire body is treated as the desired state.
-
-Create a file `pattern-update.json` with all required fields plus any changes:
-
-```json
-{
-  "name": "cc-numbers-weighted",
-  "type": "custom",
-  "detection_config": {
-    "technique": "weighted_regex",
-    "supported_confidence_levels": ["low", "medium", "high"]
-  },
-  "matching_rules": {
-    "proximity_distance": 30,
-    "proximity_keywords": ["card", "credit", "visa", "mastercard", "amex"],
-    "regexes": [
-      { "regex": "\\b\\d{16}\\b", "weight": 1.0 },
-      { "regex": "\\b\\d{15}\\b", "weight": 0.8 },
-      { "regex": "\\b\\d{13}\\b", "weight": 0.6 }
-    ]
-  },
-  "tags": {
-    "classification": ["PCI"],
-    "compliance": ["PCI-DSS-3.2.1"],
-    "geography": ["US", "EU"]
-  }
-}
-```
-
-Then invoke replace:
+Full PUT — the entire body becomes the desired state. Uses the same `writeFlags` as `create`:
 
 ```bash
-airs runtime dlp patterns replace 6990... --body-file pattern-update.json
-airs runtime dlp patterns replace 6990... --body-file pattern-update.json --output json
+airs runtime dlp patterns replace 6990... \
+  --name "cc-numbers-weighted" \
+  --technique weighted_regex \
+  --confidence-levels "low,medium,high" \
+  --proximity-distance 30 \
+  --proximity-keyword card --proximity-keyword credit \
+  --weighted-regex "\\b\\d{16}\\b|1.0" \
+  --weighted-regex "\\b\\d{15}\\b|0.8" \
+  --weighted-regex "\\b\\d{13}\\b|0.6" \
+  --tag "classification=PCI" \
+  --output json
 ```
 
-**Output** — updated pattern with incremented version and refreshed `audit_metadata`.
+`--body-file pattern-update.json` is also accepted.
+
+**Output (`--output json`)** — curated ack `{action: "replaced", id, name, type, status, version}` with incremented version.
 
 ## patch
 
-Use JSON Merge Patch to update only specified fields. Required fields even on patch: `name`, `type`, `detection_config`. Other fields use nullable semantics: omit to leave unchanged, send `null` to clear.
+JSON Merge Patch. Use `--set k=v` and `--clear k` for scalar tweaks; `--body-file` for nested fields. Required fields even on patch: `name`, `type`, `detection_config` — include them via `--set` if your patch touches anything else.
 
-Create a file `pattern-patch.json`:
-
-```json
-{
-  "name": "cc-numbers-weighted",
-  "type": "custom",
-  "detection_config": {
-    "technique": "weighted_regex",
-    "supported_confidence_levels": ["low", "medium", "high"]
-  },
-  "matching_rules": {
-    "proximity_distance": 30,
-    "proximity_keywords": ["card", "credit", "visa", "mastercard", "amex"],
-    "regexes": [
-      { "regex": "\\b\\d{16}\\b", "weight": 1.0 },
-      { "regex": "\\b\\d{15}\\b", "weight": 0.8 },
-      { "regex": "\\b\\d{13}\\b", "weight": 0.6 }
-    ]
-  },
-  "description": null
-}
-```
-
-Then invoke patch:
+`--set/--clear` values are coerced: numbers stay numeric, `true`/`false` become booleans, `null` clears, and JSON literals parse. To force a string that looks numeric, quote: `--set count='"5"'`.
 
 ```bash
-airs runtime dlp patterns patch 6990... --body-file pattern-patch.json
+# Scalar tweaks
+airs runtime dlp patterns patch 6990... \
+  --set name='"cc-numbers-weighted"' \
+  --set type='"custom"' \
+  --clear description
+
+# Nested fields via JSON file
 airs runtime dlp patterns patch 6990... --body-file pattern-patch.json --output json
 ```
 
-**Output** — patched pattern with `description` cleared (omitted from response) and the third regex persisted.
+`--body-file` is mutually exclusive with `--set/--clear`.
+
+**Output (`--output json`)** — curated ack `{action: "patched", id, name, type, status, version}`.
 
 ## delete
 

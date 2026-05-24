@@ -1,5 +1,18 @@
 # Release Notes
 
+## v2.10.0
+
+### Changed
+
+- **DLP write commands now take structured flags** — `patterns|profiles|filtering-profiles create/replace` accept `--name`, `--regex`, `--weighted-regex`, `--pattern-id`, `--file-based`, `--direction`, `--tag k=v`, etc. instead of forcing `--body-file pattern.json`. `--body`/`--body-file` retained as escape hatches for complex rule trees.
+- **DLP output curated across all formats** — `--output json|yaml` now returns `{items, page:{number,size,total,returned}}` for lists and `{action,id,name,type,status,version}` for acks, dropping the raw SDK envelope leak (`tenant_id`, `is_parent_managed`, `pageable.*`).
+
+### Fixed
+
+- **`dlp dictionaries create` now honors `--output`** — was hardcoded to `pretty`, ignoring the flag. Now matches the rest of the DLP command surface.
+
+---
+
 ## v2.9.0
 
 ### New
