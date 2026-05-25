@@ -30,6 +30,10 @@ User flagged the four DLP pages specifically:
 3. When live execution hits an upstream API, CLI, or SDK defect, surface it as a `!!! bug` admonition with a tracking-issue link — never fabricate output.
 4. Ship as parallelizable per-command-group issues under one native parent epic.
 
+## Hard constraint: CLI cwd
+
+All `airs` invocations during capture **must** run from `~/development/cdot65/prisma-airs-cli`. The repo-local `.env` (or `.env.cdot65` / `.env.dus` for alternate tenants) is what supplies `PANW_AI_SEC_API_KEY`, `PANW_MGMT_*`, and `PANW_DLP_ENDPOINT`. Running from anywhere else fails with missing-credential errors. Every dispatch message must include `cd ~/development/cdot65/prisma-airs-cli` before any CLI command.
+
 ## Non-goals
 
 - Not refactoring the example structure on the 7 pages that already have examples.
@@ -122,10 +126,14 @@ Fixtures committed under `docs/cli/examples/<area>/<command>.json` use the same 
 | 7 | docs(runtime/topics): live examples | `runtime/topics.md` | — |
 | 8 | docs(runtime/api-keys + customer-apps): live examples | 2 pages | — |
 | 9 | docs(runtime/{deployment-profiles,dlp-profiles,scan-logs,resume-poll}): live examples | 4 pages | — |
-| 10 | docs(redteam): live examples for remaining gaps | redteam/* | — |
-| 11 | docs(model-security): live examples for remaining gaps | model-security/* | — |
+| 10 | docs(redteam/scan-lifecycle): live examples | redteam/{abort,status,report}.md | — |
+| 11 | docs(redteam/prompts): live examples | redteam/{prompt-sets,prompts}.md | — |
+| 12 | docs(redteam/targets-config): live examples | redteam/{targets,devices,eula,registry-credentials,instances,properties}.md | — |
+| 13 | docs(model-security): live examples | model-security/{groups,rules,rule-instances,scans,labels,pypi-auth}.md | — |
 
-#1 is the only blocker. #2–#11 parallelize freely once #1 lands.
+#1 is the only blocker. #2–#13 parallelize freely once #1 lands.
+
+**Tracking**: parent issue labeled `epic`; no milestone (repo doesn't use them). Sub-issues labeled `documentation`.
 
 ## Per-issue workflow (agent recipe)
 
@@ -149,7 +157,8 @@ Every per-group issue follows the same nine steps:
 - A snippet template file (or doc section) showing the exact example block format above.
 - The `docs/cli/examples/` directory layout documented.
 - Redaction convention captured as a short doc.
-- Optional helper `scripts/capture-doc-example.sh` wrapping `airs <cmd>` + `--output json` + `--output yaml` into three local files.
+
+No helper script — three direct `airs` invocations per command is fine; a wrapper adds complexity without saving time.
 
 ## Agent dispatch plan
 
@@ -162,7 +171,8 @@ Four tmux windows in the `prisma-airs-cli` session: `orchestrator` (me), `agent-
 - `documentation` → #4 profiles
 
 **Wave 3** (as agents free up): #5 filtering-profiles, #6 runtime/profiles, #7 runtime/topics.
-**Wave 4** (bundled remainder): #8, #9, #10, #11.
+**Wave 4** (as agents free up): #8 api-keys+customer-apps, #9 deployment-profiles+dlp-profiles+scan-logs+resume-poll.
+**Wave 5** (final batch): #10 redteam/scan-lifecycle, #11 redteam/prompts, #12 redteam/targets-config, #13 model-security.
 
 ## Dispatch message template
 
@@ -177,18 +187,18 @@ Read first:
   - Prep output from issue #1: see template + helper script.
 
 Task:
-  1. Gap audit on: <pages>
-  2. Build fixtures for write ops (commit under docs/cli/examples/<area>/)
-  3. Live capture: pretty + JSON + YAML for list/get; JSON only for write ops
-  4. Redact per spec
-  5. Add bug admonition + file CLI/SDK/upstream bug if hit
-  6. Update doc page; add .changeset/<slug>.md (patch)
-  7. Open PR; post summary as PR comment.
-  8. Then from your tmux window:
+  1. cd ~/development/cdot65/prisma-airs-cli  (REQUIRED — .env auto-loads here)
+  2. Gap audit on: <pages>
+  3. Build fixtures for write ops (commit under docs/cli/examples/<area>/)
+  4. Live capture: pretty + JSON + YAML for list/get; JSON only for write ops
+  5. Redact per spec (tenant IDs, UUIDs, emails, customer app names)
+  6. Add bug admonition + file CLI/SDK/upstream bug if hit
+  7. Update doc page; add .changeset/<slug>.md (patch)
+  8. Open PR; post summary as PR comment.
+  9. Then from your tmux window:
        tmux send-keys -t prisma-airs-cli:orchestrator "Issue #N done — PR <url>. <one-line summary>." Enter
        tmux send-keys -t prisma-airs-cli:orchestrator " " Enter
 
-Credentials: source ~/development/cdot65/prisma-airs-cli/.env before running airs.
 Do NOT touch any file outside: the listed doc pages, docs/cli/examples/, and .changeset/.
 ```
 
@@ -215,8 +225,8 @@ On the space-enter ping:
 | Two PRs touch the same fixture path | Reject the later PR, ask for rebase. |
 | Agent files an over-broad PR (touches code, refactors) | Reject; require revert + redo within scope. |
 
-## Open questions
+## Resolved decisions
 
-- Capture helper script in PREP issue (#1) — actually build it, or leave as a "nice to have"?
-- Wave 4 issues (#10 redteam, #11 model-security) — do those scope first via a brief audit, or guess sub-issue count now?
-- Should the parent epic be assigned a milestone, or just labeled `epic`?
+- No capture helper script — three direct `airs` calls per command, no wrapper.
+- Wave 4/5 sub-issue split decided up front: redteam splits into scan-lifecycle / prompts / targets-config; model-security stays one issue.
+- Parent epic uses `epic` label; no milestone.
