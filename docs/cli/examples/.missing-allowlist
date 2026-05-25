@@ -1,0 +1,106 @@
+# Commands awaiting curated input/output examples. Burn this list down to zero,
+# then flip docs:check to hard-fail in CI (remove the allowlist read).
+runtime api-keys list
+runtime api-keys create
+runtime api-keys regenerate
+runtime api-keys delete
+runtime customer-apps list
+runtime customer-apps get
+runtime customer-apps update
+runtime customer-apps delete
+runtime deployment-profiles list
+runtime dlp-profiles list
+runtime profiles list
+runtime profiles get
+runtime profiles create
+runtime profiles update
+runtime profiles delete
+runtime resume-poll
+runtime scan-logs query
+runtime topics delete
+runtime topics get
+runtime topics list
+runtime topics update
+runtime dlp filtering-profiles list
+runtime dlp filtering-profiles get
+runtime dlp filtering-profiles replace
+runtime dlp patterns list
+runtime dlp patterns create
+runtime dlp patterns get
+runtime dlp patterns replace
+runtime dlp patterns patch
+runtime dlp patterns delete
+runtime dlp profiles list
+runtime dlp profiles create
+runtime dlp profiles get
+runtime dlp profiles replace
+runtime dlp profiles patch
+runtime dlp profiles delete
+runtime dlp dictionaries list
+runtime dlp dictionaries create
+runtime dlp dictionaries get
+runtime dlp dictionaries replace
+runtime dlp dictionaries patch
+runtime dlp dictionaries delete
+redteam abort
+redteam eula status
+redteam eula content
+redteam eula accept
+redteam instances create
+redteam instances get
+redteam instances update
+redteam instances delete
+redteam devices create
+redteam devices update
+redteam devices delete
+redteam registry-credentials
+redteam prompt-sets get
+redteam prompt-sets create
+redteam prompt-sets update
+redteam prompt-sets archive
+redteam prompt-sets download
+redteam prompt-sets upload
+redteam prompts list
+redteam prompts get
+redteam prompts add
+redteam prompts update
+redteam prompts delete
+redteam properties list
+redteam properties create
+redteam properties values
+redteam properties add-value
+redteam report
+redteam status
+redteam targets get
+redteam targets create
+redteam targets update
+redteam targets delete
+redteam targets probe
+redteam targets profile
+redteam targets update-profile
+redteam targets validate-auth
+redteam targets metadata
+redteam targets init
+redteam targets templates
+redteam targets backup
+redteam targets restore
+model-security groups get
+model-security groups create
+model-security groups update
+model-security groups delete
+model-security labels add
+model-security labels set
+model-security labels delete
+model-security labels keys
+model-security labels values
+model-security pypi-auth
+model-security rule-instances get
+model-security rule-instances update
+model-security rules get
+model-security scans get
+model-security scans create
+model-security scans evaluations
+model-security scans evaluation
+model-security scans violations
+model-security scans violation
+model-security scans files
