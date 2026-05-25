@@ -19,5 +19,31 @@ airs runtime bulk-scan [options]
 
 ### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Bulk scan with default output*
+
+```bash
+airs runtime bulk-scan --profile my-profile --input prompts.txt
+```
+
+```text
+Prisma AIRS Bulk Scan
+Profile: AI-Firewall-High-Security-Profile
+Prompts: 5
+Batches: 1
+
+Submitting async scans...
+Submitted 1 batch(es), polling for results...
+
+Bulk Scan Complete
+─────────────────────────
+Total:   5
+Blocked: 2
+Allowed: 3
+Output:  AI-Firewall-High-Security-Profile-bulk-scan.csv
+```
+
+*Custom output path*
+
+```bash
+airs runtime bulk-scan --profile my-profile --input prompts.txt --output results.csv
+```

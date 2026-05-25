@@ -181,8 +181,29 @@ airs runtime profiles cleanup [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Dry run (preview)*
+
+```bash
+airs runtime profiles cleanup
+```
+
+*Delete old revisions*
+
+```bash
+airs runtime profiles cleanup --force
+```
+
+*Specify email for audit trail*
+
+```bash
+airs runtime profiles cleanup --force --updated-by user@example.com
+```
+
+*JSON output*
+
+```bash
+airs runtime profiles cleanup --force --output json
+```
 
 ---
 
@@ -210,5 +231,20 @@ airs runtime profiles audit [options] <profileName>
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Audit all topics in a profile*
+
+```bash
+airs runtime profiles audit my-security-profile
+```
+
+*JSON export*
+
+```bash
+airs runtime profiles audit my-security-profile --format json
+```
+
+*HTML report*
+
+```bash
+airs runtime profiles audit my-security-profile --format html --output audit-report.html
+```

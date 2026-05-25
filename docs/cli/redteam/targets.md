@@ -16,8 +16,22 @@ airs redteam targets list [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*List all targets*
+
+```bash
+airs redteam targets list
+```
+
+```text
+Targets:
+
+89e2374c-7bac-4c5c-a291-9392ae919e14
+  litellm.cdot.io - no guardrails - REST APIv2  active  type: APPLICATION
+f2953fa2-943c-47aa-814d-0f421f6e071b
+  AWS Bedrock - Claude 4.6  active  type: MODEL
+b9e2861d-73ac-48b5-a56f-f43039cfc4a1
+  postman  inactive  type: AGENT
+```
 
 ---
 

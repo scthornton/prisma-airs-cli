@@ -22,8 +22,24 @@ airs model-security rule-instances list [options] <groupUuid>
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*List rule instances in a group*
+
+```bash
+airs model-security rule-instances list <groupUuid>
+```
+
+```text
+Rule Instances:
+
+16b310b7-5bc3-472a-928b-a80d751ea8b0
+  Known Framework Operators Check  BLOCKING
+1f46e5ab-d7cf-4dba-98c5-e93eab4c280c
+  Load Time Code Execution Check  BLOCKING
+d90c57bb-8ee5-41dc-94db-c7e3e23bd0dd
+  Model Architecture Backdoor Check  BLOCKING
+8960246d-fe50-4a40-9df4-11732cd5ec85
+  Stored In Approved File Format  BLOCKING
+```
 
 ---
 

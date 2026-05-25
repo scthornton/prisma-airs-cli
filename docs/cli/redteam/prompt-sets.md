@@ -16,8 +16,22 @@ airs redteam prompt-sets list [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*List all prompt sets*
+
+```bash
+airs redteam prompt-sets list
+```
+
+```text
+Prompt Sets:
+
+c820d9b8-4342-4d9a-b0b4-6b2d9f5e04fb
+  pokemon-guardrail-tests  active
+7829805d-6479-4ce1-866b-2bff66a3c766
+  daystrom-Explosives and Bomb-Making Discussions-ZdeHhCW  active
+d68a14f5-cea3-4047-bedb-ae5726ba20d2
+  Saffron  inactive
+```
 
 ---
 

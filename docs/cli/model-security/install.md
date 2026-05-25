@@ -18,5 +18,26 @@ airs model-security install [options]
 
 ### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Install with all extras (auto-detects uv or pip)*
+
+```bash
+airs model-security install
+```
+
+*Install with AWS support only*
+
+```bash
+airs model-security install --extras aws
+```
+
+*Preview commands without executing*
+
+```bash
+airs model-security install --dry-run
+```
+
+*Install into a custom directory*
+
+```bash
+airs model-security install --dir my-scanner
+```

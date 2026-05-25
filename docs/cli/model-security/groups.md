@@ -22,8 +22,26 @@ airs model-security groups list [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*List security groups*
+
+```bash
+airs model-security groups list
+```
+
+```text
+Security Groups:
+
+bb1d038a-0506-4b07-8f16-a723b8c1a1c7
+  Default GCS  ACTIVE  source: GCS
+020d546d-3920-4ef3-9183-00f37f33f566
+  Default LOCAL  ACTIVE  source: LOCAL
+6a1e67e1-00cc-45dc-9395-3a9e3dbf50f9
+  Default S3  ACTIVE  source: S3
+fd1a4209-32d0-4a1a-bd40-cde35104dc39
+  Default AZURE  ACTIVE  source: AZURE
+4c22aef7-2ab7-40ba-b3f1-cd9e9aa1768e
+  Default HUGGING_FACE  ACTIVE  source: HUGGING_FACE
+```
 
 ---
 

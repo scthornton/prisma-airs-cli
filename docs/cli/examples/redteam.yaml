@@ -1,0 +1,86 @@
+"redteam scan":
+  examples:
+    - note: Static scan with all categories
+      input: airs redteam scan --target <uuid> --name "Full Scan"
+    - note: Custom scan with prompt sets
+      input: airs redteam scan --target <uuid> --name "Topic Validation" --type CUSTOM --prompt-sets <uuid1>,<uuid2>
+    - note: Dynamic scan with goals file
+      input: airs redteam scan --target <uuid> --name "Agent Scan" --type DYNAMIC --goals goals.json --depth 10 --breadth 6
+
+"redteam list":
+  examples:
+    - note: List recent scans
+      input: airs redteam list
+      output: |
+        Recent Scans:
+
+        304becf3-7090-413a-aa41-2cd327b7f0c5
+          Pokemon guardrail validation  COMPLETED  CUSTOM  score: 0.43
+          2026-03-08T11:11:21.371253Z
+
+        06711c07-69de-4a79-b61c-4c03d1175694
+          E2E Custom Scan - Explosives Topic v2  COMPLETED  CUSTOM  score: 12.5
+          2026-03-08T10:37:56.654621Z
+
+        19f5dd0e-e06f-45d4-9ebe-b45ca3f20e42
+          litellm.cdot.io - no guardrails - 004  ABORTED  STATIC
+          2026-03-06T01:42:28.477755Z
+
+"redteam targets list":
+  examples:
+    - note: List all targets
+      input: airs redteam targets list
+      output: |
+        Targets:
+
+        89e2374c-7bac-4c5c-a291-9392ae919e14
+          litellm.cdot.io - no guardrails - REST APIv2  active  type: APPLICATION
+        f2953fa2-943c-47aa-814d-0f421f6e071b
+          AWS Bedrock - Claude 4.6  active  type: MODEL
+        b9e2861d-73ac-48b5-a56f-f43039cfc4a1
+          postman  inactive  type: AGENT
+
+"redteam prompt-sets list":
+  examples:
+    - note: List all prompt sets
+      input: airs redteam prompt-sets list
+      output: |
+        Prompt Sets:
+
+        c820d9b8-4342-4d9a-b0b4-6b2d9f5e04fb
+          pokemon-guardrail-tests  active
+        7829805d-6479-4ce1-866b-2bff66a3c766
+          daystrom-Explosives and Bomb-Making Discussions-ZdeHhCW  active
+        d68a14f5-cea3-4047-bedb-ae5726ba20d2
+          Saffron  inactive
+
+"redteam categories":
+  examples:
+    - note: List attack categories
+      input: airs redteam categories
+      output: |
+        Attack Categories:
+
+        Security — Select categories for adversarial testing of security vulnerabilities and potential exploits.
+          • Adversarial Suffix — Adversarial suffix attacks
+          • Jailbreak — Jailbreak attempts
+          • Prompt Injection — Direct prompt injection attacks
+          • Remote Code Execution — Remote code execution attempts
+          • System Prompt leak — System prompt extraction
+          ...
+
+        Safety — Select categories for testing harmful or toxic content and ethical misuse scenarios.
+          • Bias — Bias-related content
+          • CBRN — Chemical, Biological, Radiological, Nuclear content
+          • Hate / Toxic / Abuse — Hate speech, toxic, or abusive content
+          ...
+
+        Brand Reputation — Select categories for testing off-brand content.
+          • Competitor Endorsements — Content endorsing competitor brands
+          ...
+
+        Compliance — Select framework to understand compliance across security and safety standards.
+          • OWASP Top 10 for LLMs 2025 — Open Web Application Security Project 2025 Edition
+          • MITRE ATLAS — MITRE Adversarial Tactics, Techniques, and Common Knowledge
+          • NIST AI-RMF — National Institute of Standards and Technology Cybersecurity Framework
+          ...

@@ -21,8 +21,24 @@ airs model-security scans list [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*List model security scans*
+
+```bash
+airs model-security scans list
+```
+
+```text
+Model Security Scans:
+
+7a7e1cdf-a6b1-4743-a5f2-a7bd96ec7bab
+  BLOCKED  HUGGING_FACE  2026-03-03T22:32:12.344402Z
+  https://huggingface.co/microsoft/DialoGPT-medium
+  Rules: 10 passed  1 failed  / 11 total
+ee71b4da-64ce-4d6c-96fb-2bced1154a06
+  ALLOWED  MODEL_SECURITY_SDK  2026-03-03T22:21:44.130386Z
+  /Users/cdot/models/qwen3-0.6b-saffron-merged
+  Rules: 6 passed  0 failed  / 6 total
+```
 
 ---
 

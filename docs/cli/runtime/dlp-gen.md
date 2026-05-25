@@ -21,5 +21,34 @@ airs runtime dlp-gen [options]
 
 ### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Full corpus, reproducible seed*
+
+```bash
+airs runtime dlp-gen --types all --seed 1
+```
+
+```text
+DLP Test-File Generation
+Output:   ./temp
+Seed:     1
+Clean:    5    Dirty: 15
+Manifest: ./temp/manifest.json
+
+  svg   clean=1 dirty=3
+  png   clean=1 dirty=3
+  pdf   clean=1 dirty=3
+  jpeg  clean=1 dirty=3
+  docx  clean=1 dirty=3
+```
+
+*Images only, 3 of each*
+
+```bash
+airs runtime dlp-gen --types png,jpeg,svg --count 3
+```
+
+*PNG LSB steganography only, JSON summary*
+
+```bash
+airs runtime dlp-gen --types png --techniques stego-lsb --output json
+```

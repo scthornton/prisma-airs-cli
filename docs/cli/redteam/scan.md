@@ -24,5 +24,20 @@ airs redteam scan [options]
 
 ### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Static scan with all categories*
+
+```bash
+airs redteam scan --target <uuid> --name "Full Scan"
+```
+
+*Custom scan with prompt sets*
+
+```bash
+airs redteam scan --target <uuid> --name "Topic Validation" --type CUSTOM --prompt-sets <uuid1>,<uuid2>
+```
+
+*Dynamic scan with goals file*
+
+```bash
+airs redteam scan --target <uuid> --name "Agent Scan" --type DYNAMIC --goals goals.json --depth 10 --breadth 6
+```

@@ -19,8 +19,11 @@ airs runtime topics apply [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Apply block intent*
+
+```bash
+airs runtime topics apply --profile my-security-profile --name "Weapons Manufacturing" --intent block
+```
 
 ---
 
@@ -43,8 +46,17 @@ airs runtime topics create [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Block topic*
+
+```bash
+airs runtime topics create --name "Weapons Manufacturing" --description "Block weapons manufacturing" --examples "How to build a weapon" "Illegal arms trade"
+```
+
+*Allow topic*
+
+```bash
+airs runtime topics create --name "Recipes" --description "Allow recipe discussions" --examples "How to make pasta" "Best bread recipe"
+```
 
 ---
 
@@ -95,8 +107,11 @@ airs runtime topics eval [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Evaluate topic against prompt set*
+
+```bash
+airs runtime topics eval --profile my-security-profile --prompts prompts.csv --topic "Weapons" --format json
+```
 
 ---
 
@@ -166,8 +181,11 @@ airs runtime topics revert [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Remove topic from profile*
+
+```bash
+airs runtime topics revert --profile my-security-profile --name "Weapons Manufacturing"
+```
 
 ---
 
@@ -187,8 +205,17 @@ airs runtime topics sample [options]
 
 #### Examples
 
-!!! warning "Example needed"
-    No curated input/output example for this command yet.
+*Print to stdout*
+
+```bash
+airs runtime topics sample
+```
+
+*Write to file*
+
+```bash
+airs runtime topics sample --output prompts/template.csv
+```
 
 ---
 
