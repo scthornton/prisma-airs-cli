@@ -317,5 +317,5 @@ The `apply` command is additive — it preserves existing topics on the profile.
 - [How It Works](overview.md) — architecture and platform constraints
 - [Metrics & Evaluation](metrics.md) — how TP/TN/FP/FN are classified
 - [Topic Constraints](topic-constraints.md) — AIRS limits on topic definitions
-- [CLI Commands — Topics](../../reference/cli-commands.md#runtime-topics) — full flag reference
+- [CLI Reference — Topics](../../cli/runtime/topics.md) — full flag reference
 - `program.md` — the agent optimization protocol

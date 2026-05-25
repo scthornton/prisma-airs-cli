@@ -6,6 +6,10 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+      - "scripts/**"
+      - "src/**"
+      - "typedoc.json"
+      - "package.json"
       - ".github/workflows/mkdocs-deploy.yml"
   workflow_dispatch:
 
@@ -28,15 +32,25 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - run: pip install -r docs/requirements.txt
 
-      - name: Install MkDocs
-        run: pip install mkdocs mkdocs-material
+      - name: Generate CLI + API reference
+        run: |
+          pnpm docs:gen
+          pnpm docs:api
 
       - name: Build docs
-        run: mkdocs build
+        run: mkdocs build --strict
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -28,7 +28,12 @@
     "docker:build:amd64": "docker buildx build --platform linux/amd64 --load -t prisma-airs-cli:local-amd64 .",
     "docker:build:arm64": "docker buildx build --platform linux/arm64 --load -t prisma-airs-cli:local-arm64 .",
     "docker:run": "docker run --rm -v ~/.prisma-airs:/root/.prisma-airs prisma-airs-cli:local",
-    "docker:push:arm64": "./scripts/docker-push-arm64.sh"
+    "docker:push:arm64": "./scripts/docker-push-arm64.sh",
+    "docs:gen": "tsx scripts/gen-cli-docs.ts",
+    "docs:api": "typedoc",
+    "docs:build": "pnpm docs:gen && pnpm docs:api && mkdocs build --strict",
+    "docs:serve": "pnpm docs:gen && pnpm docs:api && mkdocs serve",
+    "docs:check": "tsx scripts/check-cli-docs.ts"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -65,6 +70,8 @@
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^3.0.0",
     "tsx": "^4.0.0",
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   }

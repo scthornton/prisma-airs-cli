@@ -40,6 +40,10 @@ The `airs redteam` command group provides full access to Red Team operations:
 - [EULA & Infrastructure](infrastructure.md) -- EULA acceptance, instance management, devices, registry credentials
 - [Prompt Sets & Prompts](prompt-sets.md) -- manage custom prompt sets and individual prompts
 
+!!! tip "Exact command syntax"
+    Every red team command with options and example output lives in the
+    [CLI Reference](../cli/redteam/scan.md).
+
 ## Authentication
 
 Red Team operations reuse the same OAuth2 credentials as topic management:

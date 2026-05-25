@@ -1,0 +1,21 @@
+# Interface: ModelSecurityLabel
+
+Defined in: [src/airs/types.ts:686](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L686)
+
+Label key-value pair.
+
+## Properties
+
+### key
+
+> **key**: `string`
+
+Defined in: [src/airs/types.ts:687](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L687)
+
+***
+
+### value
+
+> **value**: `string`
+
+Defined in: [src/airs/types.ts:688](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L688)

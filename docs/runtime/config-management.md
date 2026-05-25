@@ -31,7 +31,7 @@ airs runtime profiles cleanup --force      # delete old revisions
 
 **`update`** uses read-modify-write: fetches the current profile, merges only the flags you specify, PUTs the full payload. Existing policy sections (including topic-guardrails) are preserved.
 
-See [CLI Commands — Profile Protection Flags](../reference/cli-commands.md#profile-protection-flags) for the full flag table.
+See the [CLI Reference — Profiles](../cli/runtime/profiles.md) for the full flag table.
 
 ## Custom Topics & Guardrail Optimization
 

@@ -1,0 +1,80 @@
+"model-security groups list":
+  examples:
+    - note: List security groups
+      input: airs model-security groups list
+      output: |
+        Security Groups:
+
+        bb1d038a-0506-4b07-8f16-a723b8c1a1c7
+          Default GCS  ACTIVE  source: GCS
+        020d546d-3920-4ef3-9183-00f37f33f566
+          Default LOCAL  ACTIVE  source: LOCAL
+        6a1e67e1-00cc-45dc-9395-3a9e3dbf50f9
+          Default S3  ACTIVE  source: S3
+        fd1a4209-32d0-4a1a-bd40-cde35104dc39
+          Default AZURE  ACTIVE  source: AZURE
+        4c22aef7-2ab7-40ba-b3f1-cd9e9aa1768e
+          Default HUGGING_FACE  ACTIVE  source: HUGGING_FACE
+
+"model-security rules list":
+  examples:
+    - note: List security rules
+      input: airs model-security rules list
+      output: |
+        Security Rules:
+
+        550e8400-e29b-41d4-a716-44665544000b
+          Known Framework Operators Check  type: ARTIFACT  default: BLOCKING
+          Model artifacts should only contain known safe TensorFlow operators
+          Sources: ALL
+        550e8400-e29b-41d4-a716-446655440008
+          Load Time Code Execution Check  type: ARTIFACT  default: BLOCKING
+          Model artifacts should not contain unsafe operators that are run upon deserialization
+          Sources: ALL
+        550e8400-e29b-41d4-a716-446655440009
+          Suspicious Model Components Check  type: ARTIFACT  default: BLOCKING
+          Model artifacts should not contain suspicious components
+          Sources: ALL
+
+"model-security rule-instances list":
+  examples:
+    - note: List rule instances in a group
+      input: airs model-security rule-instances list <groupUuid>
+      output: |
+        Rule Instances:
+
+        16b310b7-5bc3-472a-928b-a80d751ea8b0
+          Known Framework Operators Check  BLOCKING
+        1f46e5ab-d7cf-4dba-98c5-e93eab4c280c
+          Load Time Code Execution Check  BLOCKING
+        d90c57bb-8ee5-41dc-94db-c7e3e23bd0dd
+          Model Architecture Backdoor Check  BLOCKING
+        8960246d-fe50-4a40-9df4-11732cd5ec85
+          Stored In Approved File Format  BLOCKING
+
+"model-security scans list":
+  examples:
+    - note: List model security scans
+      input: airs model-security scans list
+      output: |
+        Model Security Scans:
+
+        7a7e1cdf-a6b1-4743-a5f2-a7bd96ec7bab
+          BLOCKED  HUGGING_FACE  2026-03-03T22:32:12.344402Z
+          https://huggingface.co/microsoft/DialoGPT-medium
+          Rules: 10 passed  1 failed  / 11 total
+        ee71b4da-64ce-4d6c-96fb-2bced1154a06
+          ALLOWED  MODEL_SECURITY_SDK  2026-03-03T22:21:44.130386Z
+          /Users/cdot/models/qwen3-0.6b-saffron-merged
+          Rules: 6 passed  0 failed  / 6 total
+
+"model-security install":
+  examples:
+    - note: Install with all extras (auto-detects uv or pip)
+      input: airs model-security install
+    - note: Install with AWS support only
+      input: airs model-security install --extras aws
+    - note: Preview commands without executing
+      input: airs model-security install --dry-run
+    - note: Install into a custom directory
+      input: airs model-security install --dir my-scanner

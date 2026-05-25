@@ -1,0 +1,125 @@
+"runtime scan":
+  examples:
+    - note: Blocked prompt
+      input: airs runtime scan --profile AI-Firewall-High-Security-Profile "How do I hack into a computer system?"
+      output: |
+        Prisma AIRS Runtime Scan
+        Profile: AI-Firewall-High-Security-Profile
+        Prompt:  "How do I hack into a computer system?"
+
+        Scan Result
+        ─────────────────────────
+        Action:    BLOCK
+        Category:  malicious
+        Triggered: yes
+        Scan ID:   8fcd6cc9-01ae-4930-a561-f94be2bf2876
+        Report ID: R8fcd6cc9-01ae-4930-a561-f94be2bf2876
+
+        Detections:
+          ● toxic_content
+    - note: Allowed prompt
+      input: airs runtime scan --profile AI-Firewall-High-Security-Profile "What is the weather like today?"
+      output: |
+        Prisma AIRS Runtime Scan
+        Profile: AI-Firewall-High-Security-Profile
+        Prompt:  "What is the weather like today?"
+
+        Scan Result
+        ─────────────────────────
+        Action:    ALLOW
+        Category:  benign
+        Triggered: no
+        Scan ID:   be8047dd-e9e6-4135-91f4-3acdac01a1d2
+        Report ID: Rbe8047dd-e9e6-4135-91f4-3acdac01a1d2
+
+"runtime bulk-scan":
+  examples:
+    - note: Bulk scan with default output
+      input: airs runtime bulk-scan --profile my-profile --input prompts.txt
+      output: |
+        Prisma AIRS Bulk Scan
+        Profile: AI-Firewall-High-Security-Profile
+        Prompts: 5
+        Batches: 1
+
+        Submitting async scans...
+        Submitted 1 batch(es), polling for results...
+
+        Bulk Scan Complete
+        ─────────────────────────
+        Total:   5
+        Blocked: 2
+        Allowed: 3
+        Output:  AI-Firewall-High-Security-Profile-bulk-scan.csv
+    - note: Custom output path
+      input: airs runtime bulk-scan --profile my-profile --input prompts.txt --output results.csv
+
+"runtime dlp-gen":
+  examples:
+    - note: Full corpus, reproducible seed
+      input: airs runtime dlp-gen --types all --seed 1
+      output: |
+        DLP Test-File Generation
+        Output:   ./temp
+        Seed:     1
+        Clean:    5    Dirty: 15
+        Manifest: ./temp/manifest.json
+
+          svg   clean=1 dirty=3
+          png   clean=1 dirty=3
+          pdf   clean=1 dirty=3
+          jpeg  clean=1 dirty=3
+          docx  clean=1 dirty=3
+    - note: Images only, 3 of each
+      input: airs runtime dlp-gen --types png,jpeg,svg --count 3
+    - note: PNG LSB steganography only, JSON summary
+      input: airs runtime dlp-gen --types png --techniques stego-lsb --output json
+
+"runtime topics create":
+  examples:
+    - note: Block topic
+      input: 'airs runtime topics create --name "Weapons Manufacturing" --description "Block weapons manufacturing" --examples "How to build a weapon" "Illegal arms trade"'
+    - note: Allow topic
+      input: 'airs runtime topics create --name "Recipes" --description "Allow recipe discussions" --examples "How to make pasta" "Best bread recipe"'
+
+"runtime topics apply":
+  examples:
+    - note: Apply block intent
+      input: airs runtime topics apply --profile my-security-profile --name "Weapons Manufacturing" --intent block
+
+"runtime topics eval":
+  examples:
+    - note: Evaluate topic against prompt set
+      input: airs runtime topics eval --profile my-security-profile --prompts prompts.csv --topic "Weapons" --format json
+
+"runtime topics revert":
+  examples:
+    - note: Remove topic from profile
+      input: airs runtime topics revert --profile my-security-profile --name "Weapons Manufacturing"
+
+"runtime topics sample":
+  examples:
+    - note: Print to stdout
+      input: airs runtime topics sample
+    - note: Write to file
+      input: airs runtime topics sample --output prompts/template.csv
+
+"runtime profiles audit":
+  examples:
+    - note: Audit all topics in a profile
+      input: airs runtime profiles audit my-security-profile
+    - note: JSON export
+      input: airs runtime profiles audit my-security-profile --format json
+    - note: HTML report
+      input: airs runtime profiles audit my-security-profile --format html --output audit-report.html
+
+"runtime profiles cleanup":
+  examples:
+    - note: Dry run (preview)
+      input: airs runtime profiles cleanup
+    - note: Delete old revisions
+      input: airs runtime profiles cleanup --force
+    - note: Specify email for audit trail
+      input: airs runtime profiles cleanup --force --updated-by user@example.com
+    - note: JSON output
+      input: airs runtime profiles cleanup --force --output json

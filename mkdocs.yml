@@ -24,9 +24,10 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
-    - navigation.expand
+    - navigation.indexes
     - navigation.top
     - navigation.footer
+    - toc.follow
     - content.code.copy
     - content.tabs.link
     - search.suggest
@@ -65,71 +66,15 @@ markdown_extensions:
 
 plugins:
   - search
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - redirects:
+      redirect_maps:
+        reference/cli-commands.md: cli/index.md
 
-nav:
-  - Home: index.md
-  - Getting Started:
-      - Installation: getting-started/installation.md
-      - Configuration: getting-started/configuration.md
-      - Quick Start: getting-started/quick-start.md
-      - Full CLI Command Sweep: development/full-cli-sweep.md
-      - Live Smoke Tests: development/smoke-tests.md
-  - Runtime Security:
-      - Overview: runtime/overview.md
-      - Prompt Scanning: runtime/scanning.md
-      - DLP Test-File Generation: runtime/dlp-gen.md
-      - Configuration Management: runtime/config-management.md
-      - Guardrail Optimization:
-          - How It Works: runtime/guardrails/overview.md
-          - Generate & Evaluate: runtime/guardrails/generate-and-evaluate.md
-          - Metrics & Evaluation: runtime/guardrails/metrics.md
-          - Topic Constraints: runtime/guardrails/topic-constraints.md
-      - Profile Audits: runtime/profile-audits.md
-      - DLP:
-          - Filtering Profiles: runtime/dlp/filtering-profiles.md
-          - Patterns: runtime/dlp/patterns.md
-          - Profiles: runtime/dlp/profiles.md
-          - Dictionaries: runtime/dlp/dictionaries.md
-  - AI Red Teaming:
-      - Overview: redteam/overview.md
-      - Running Scans: redteam/scanning.md
-      - Managing Targets: redteam/targets.md
-      - EULA & Infrastructure: redteam/infrastructure.md
-      - Prompt Sets & Prompts: redteam/prompt-sets.md
-      - Guardrail to Red Team: redteam/guardrail-to-redteam.md
-  - DLP Detection Testing:
-      - Overview: dlp-detection/index.md
-      - Test File Catalog: dlp-detection/catalog.md
-      - "Finding: SVG DLP Bypass": dlp-detection/svg-dlp-bypass.md
-  - Backup & Restore:
-      - Overview: backup/overview.md
-  - Model Security:
-      - Overview: model-security/overview.md
-      - Security Groups: model-security/groups.md
-      - Rules & Instances: model-security/rules.md
-      - Scans & Results: model-security/scans.md
-      - Labels: model-security/labels.md
-      - Python SDK: model-security/install.md
-  - Reference:
-      - Architecture:
-          - Overview: architecture/overview.md
-          - Guardrail Optimization: architecture/core-loop.md
-          - Design Decisions: architecture/design-decisions.md
-      - LLM Providers:
-          - Overview: providers/overview.md
-          - SaaS APIs: providers/saas-apis.md
-          - Vertex AI: providers/vertex-ai.md
-          - AWS Bedrock: providers/bedrock.md
-          - Troubleshooting: providers/troubleshooting.md
-      - CLI Commands: reference/cli-commands.md
-      - Configuration Options: reference/configuration.md
-      - Environment Variables: reference/environment-variables.md
-      - AIRS Constraints: reference/airs-constraints.md
-      - AI Agent Instructions: reference/agent-instructions.md
-  - Development:
-      - Contributing: development/contributing.md
-      - Testing: development/testing.md
-      - Local Setup: development/local-setup.md
-  - About:
-      - Release Notes: about/release-notes.md
-      - License: about/license.md
+exclude_docs: |
+  SUMMARY.md
+  superpowers/
+  cli/examples/
+  development/asdf.md
+  development/v2.7.0-smoke-test.md

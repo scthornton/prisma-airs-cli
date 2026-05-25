@@ -107,6 +107,10 @@ airs model-security labels add <scanUuid> --labels '[{"key":"env","value":"prod"
 airs model-security labels keys
 ```
 
+!!! tip "Exact command syntax"
+    Every model-security command with options and example output lives in the
+    [CLI Reference](../cli/model-security/groups.md).
+
 ## Sub-pages
 
 - [Security Groups](groups.md) — CRUD operations for security groups
