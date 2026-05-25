@@ -27,7 +27,10 @@ function checkDrift(): string[] {
   for (const tmpFile of written) {
     const rel = relative(tmp, tmpFile);
     const committed = join(COMMITTED, rel);
-    if (!existsSync(committed) || readFileSync(committed, 'utf-8') !== readFileSync(tmpFile, 'utf-8')) {
+    if (
+      !existsSync(committed) ||
+      readFileSync(committed, 'utf-8') !== readFileSync(tmpFile, 'utf-8')
+    ) {
       drifted.push(rel);
     }
   }
