@@ -424,7 +424,7 @@ airs redteam prompt-sets archive <promptSetUuid>
 
 ### D.7 — Model Security group + rule instances + scans
 
-All create/update commands take a JSON config file. Refer to the [reference page](../reference/cli-commands.md#model-security-groups) for full JSON schemas.
+All create/update commands take a JSON config file. Refer to the [CLI Reference — Model Security Groups](../cli/model-security/groups.md) for full JSON schemas.
 
 ```bash
 # Create a security group
