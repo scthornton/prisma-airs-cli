@@ -1,6 +1,6 @@
 # Class: SdkRuntimeService
 
-Defined in: [src/airs/runtime.ts:26](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/runtime.ts#L26)
+Defined in: [src/airs/runtime.ts:26](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/runtime.ts#L26)
 
 Contract for runtime scanning operations (sync + async).
 
@@ -14,7 +14,7 @@ Contract for runtime scanning operations (sync + async).
 
 > **new SdkRuntimeService**(`apiKey`): `SdkRuntimeService`
 
-Defined in: [src/airs/runtime.ts:29](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/runtime.ts#L29)
+Defined in: [src/airs/runtime.ts:29](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/runtime.ts#L29)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/airs/runtime.ts:29](https://github.com/cdot65/prisma-airs-cli/b
 
 > **pollResults**(`scanIds`, `intervalMs?`, `retryOpts?`): `Promise`\<[`RuntimeScanResult`](../interfaces/RuntimeScanResult.md)[]\>
 
-Defined in: [src/airs/runtime.ts:103](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/runtime.ts#L103)
+Defined in: [src/airs/runtime.ts:103](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/runtime.ts#L103)
 
 Poll async scan results until all complete or fail.
 
@@ -69,7 +69,7 @@ Use `scanPrompt()` (sync API) when these fields are needed.
 
 > **scanPrompt**(`profileName`, `prompt`, `response?`): `Promise`\<[`RuntimeScanResult`](../interfaces/RuntimeScanResult.md)\>
 
-Defined in: [src/airs/runtime.ts:34](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/runtime.ts#L34)
+Defined in: [src/airs/runtime.ts:34](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/runtime.ts#L34)
 
 Scan a single prompt (and optional response) synchronously.
 
@@ -101,7 +101,7 @@ Scan a single prompt (and optional response) synchronously.
 
 > **submitBulkScan**(`profileName`, `prompts`, `sessionId?`): `Promise`\<`string`[]\>
 
-Defined in: [src/airs/runtime.ts:70](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/runtime.ts#L70)
+Defined in: [src/airs/runtime.ts:70](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/runtime.ts#L70)
 
 Submit prompts for async bulk scanning, returns scan IDs.
 
@@ -133,7 +133,7 @@ Submit prompts for async bulk scanning, returns scan IDs.
 
 > `static` **formatResultsCsv**(`results`): `string`
 
-Defined in: [src/airs/runtime.ts:198](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/runtime.ts#L198)
+Defined in: [src/airs/runtime.ts:198](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/runtime.ts#L198)
 
 #### Parameters
 

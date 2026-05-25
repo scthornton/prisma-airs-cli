@@ -1,6 +1,6 @@
 # Interface: PromptDetail
 
-Defined in: [src/airs/types.ts:233](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L233)
+Defined in: [src/airs/types.ts:233](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L233)
 
 Normalized individual prompt.
 
@@ -10,7 +10,7 @@ Normalized individual prompt.
 
 > **active**: `boolean`
 
-Defined in: [src/airs/types.ts:237](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L237)
+Defined in: [src/airs/types.ts:237](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L237)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [src/airs/types.ts:237](https://github.com/cdot65/prisma-airs-cli/bl
 
 > `optional` **goal?**: `string`
 
-Defined in: [src/airs/types.ts:236](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L236)
+Defined in: [src/airs/types.ts:236](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L236)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/airs/types.ts:236](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **prompt**: `string`
 
-Defined in: [src/airs/types.ts:235](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L235)
+Defined in: [src/airs/types.ts:235](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L235)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [src/airs/types.ts:235](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **promptSetId**: `string`
 
-Defined in: [src/airs/types.ts:238](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L238)
+Defined in: [src/airs/types.ts:238](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L238)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [src/airs/types.ts:238](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **uuid**: `string`
 
-Defined in: [src/airs/types.ts:234](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L234)
+Defined in: [src/airs/types.ts:234](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L234)

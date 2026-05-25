@@ -1,6 +1,6 @@
 # Interface: RedTeamJob
 
-Defined in: [src/airs/types.ts:129](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L129)
+Defined in: [src/airs/types.ts:129](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L129)
 
 Normalized red team job/scan info.
 
@@ -10,7 +10,7 @@ Normalized red team job/scan info.
 
 > `optional` **asr?**: `number` \| `null`
 
-Defined in: [src/airs/types.ts:137](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L137)
+Defined in: [src/airs/types.ts:137](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L137)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [src/airs/types.ts:137](https://github.com/cdot65/prisma-airs-cli/bl
 
 > `optional` **completed?**: `number` \| `null`
 
-Defined in: [src/airs/types.ts:139](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L139)
+Defined in: [src/airs/types.ts:139](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L139)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/airs/types.ts:139](https://github.com/cdot65/prisma-airs-cli/bl
 
 > `optional` **createdAt?**: `string` \| `null`
 
-Defined in: [src/airs/types.ts:140](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L140)
+Defined in: [src/airs/types.ts:140](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L140)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [src/airs/types.ts:140](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **jobType**: `string`
 
-Defined in: [src/airs/types.ts:133](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L133)
+Defined in: [src/airs/types.ts:133](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L133)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [src/airs/types.ts:133](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **name**: `string`
 
-Defined in: [src/airs/types.ts:131](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L131)
+Defined in: [src/airs/types.ts:131](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L131)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [src/airs/types.ts:131](https://github.com/cdot65/prisma-airs-cli/bl
 
 > `optional` **score?**: `number` \| `null`
 
-Defined in: [src/airs/types.ts:136](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L136)
+Defined in: [src/airs/types.ts:136](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L136)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [src/airs/types.ts:136](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **status**: `string`
 
-Defined in: [src/airs/types.ts:132](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L132)
+Defined in: [src/airs/types.ts:132](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L132)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [src/airs/types.ts:132](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **targetId**: `string`
 
-Defined in: [src/airs/types.ts:134](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L134)
+Defined in: [src/airs/types.ts:134](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L134)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [src/airs/types.ts:134](https://github.com/cdot65/prisma-airs-cli/bl
 
 > `optional` **targetName?**: `string`
 
-Defined in: [src/airs/types.ts:135](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L135)
+Defined in: [src/airs/types.ts:135](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L135)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [src/airs/types.ts:135](https://github.com/cdot65/prisma-airs-cli/bl
 
 > `optional` **total?**: `number` \| `null`
 
-Defined in: [src/airs/types.ts:138](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L138)
+Defined in: [src/airs/types.ts:138](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L138)
 
 ***
 
@@ -90,4 +90,4 @@ Defined in: [src/airs/types.ts:138](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **uuid**: `string`
 
-Defined in: [src/airs/types.ts:130](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/airs/types.ts#L130)
+Defined in: [src/airs/types.ts:130](https://github.com/cdot65/prisma-airs-cli/blob/main/src/airs/types.ts#L130)

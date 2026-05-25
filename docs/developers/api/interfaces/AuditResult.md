@@ -1,6 +1,6 @@
 # Interface: AuditResult
 
-Defined in: [src/audit/types.ts:32](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L32)
+Defined in: [src/audit/types.ts:32](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L32)
 
 Complete audit result for a profile.
 
@@ -10,7 +10,7 @@ Complete audit result for a profile.
 
 > **compositeMetrics**: [`EfficacyMetrics`](EfficacyMetrics.md)
 
-Defined in: [src/audit/types.ts:36](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L36)
+Defined in: [src/audit/types.ts:36](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L36)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [src/audit/types.ts:36](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **conflicts**: [`ConflictPair`](ConflictPair.md)[]
 
-Defined in: [src/audit/types.ts:37](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L37)
+Defined in: [src/audit/types.ts:37](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L37)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/audit/types.ts:37](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **profileName**: `string`
 
-Defined in: [src/audit/types.ts:33](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L33)
+Defined in: [src/audit/types.ts:33](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L33)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [src/audit/types.ts:33](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **timestamp**: `string`
 
-Defined in: [src/audit/types.ts:34](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L34)
+Defined in: [src/audit/types.ts:34](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L34)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [src/audit/types.ts:34](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **topics**: [`TopicAuditResult`](TopicAuditResult.md)[]
 
-Defined in: [src/audit/types.ts:35](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L35)
+Defined in: [src/audit/types.ts:35](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L35)

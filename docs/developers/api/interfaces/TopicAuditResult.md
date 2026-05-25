@@ -1,6 +1,6 @@
 # Interface: TopicAuditResult
 
-Defined in: [src/audit/types.ts:17](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L17)
+Defined in: [src/audit/types.ts:17](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L17)
 
 Per-topic evaluation result.
 
@@ -10,7 +10,7 @@ Per-topic evaluation result.
 
 > **metrics**: [`EfficacyMetrics`](EfficacyMetrics.md)
 
-Defined in: [src/audit/types.ts:20](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L20)
+Defined in: [src/audit/types.ts:20](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L20)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [src/audit/types.ts:20](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **testResults**: [`TestResult`](TestResult.md)[]
 
-Defined in: [src/audit/types.ts:19](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L19)
+Defined in: [src/audit/types.ts:19](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L19)
 
 ***
 
@@ -26,4 +26,4 @@ Defined in: [src/audit/types.ts:19](https://github.com/cdot65/prisma-airs-cli/bl
 
 > **topic**: [`ProfileTopic`](ProfileTopic.md)
 
-Defined in: [src/audit/types.ts:18](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/audit/types.ts#L18)
+Defined in: [src/audit/types.ts:18](https://github.com/cdot65/prisma-airs-cli/blob/main/src/audit/types.ts#L18)

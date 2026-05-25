@@ -2,7 +2,7 @@
 
 > **loadConfig**(`cliOverrides?`, `configFilePath?`): `Promise`\<\{ `airsApiKey?`: `string`; `anthropicApiKey?`: `string`; `awsAccessKeyId?`: `string`; `awsRegion`: `string`; `awsSecretAccessKey?`: `string`; `dataDir`: `string`; `dlpEndpoint?`: `string`; `googleApiKey?`: `string`; `googleCloudLocation`: `string`; `googleCloudProject?`: `string`; `llmModel?`: `string`; `llmProvider`: `"claude-api"` \| `"claude-vertex"` \| `"claude-bedrock"` \| `"gemini-api"` \| `"gemini-vertex"` \| `"gemini-bedrock"`; `mgmtClientId?`: `string`; `mgmtClientSecret?`: `string`; `mgmtEndpoint?`: `string`; `mgmtTokenEndpoint?`: `string`; `mgmtTsgId?`: `string`; `scanConcurrency`: `number`; \}\>
 
-Defined in: [src/config/loader.ts:47](https://github.com/cdot65/prisma-airs-cli/blob/825fa649f4587acd7963f80c6325ac57a4637842/src/config/loader.ts#L47)
+Defined in: [src/config/loader.ts:47](https://github.com/cdot65/prisma-airs-cli/blob/main/src/config/loader.ts#L47)
 
 ## Parameters
 
