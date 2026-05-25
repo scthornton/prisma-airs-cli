@@ -38,8 +38,8 @@ function examplesBlock(path: string, examples: ExampleMap): string {
     .map((e) => {
       const parts: string[] = [];
       if (e.note) parts.push(`*${e.note}*`);
-      parts.push('```bash\n' + e.input.trimEnd() + '\n```');
-      if (e.output) parts.push('```text\n' + e.output.replace(/\n+$/, '') + '\n```');
+      parts.push(`\`\`\`bash\n${e.input.trimEnd()}\n\`\`\``);
+      if (e.output) parts.push(`\`\`\`text\n${e.output.replace(/\n+$/, '')}\n\`\`\``);
       return parts.join('\n\n');
     })
     .join('\n\n');
