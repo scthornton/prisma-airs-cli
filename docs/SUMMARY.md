@@ -43,15 +43,13 @@
     * Reference
         * [Configuration Options](reference/configuration.md)
         * [Environment Variables](reference/environment-variables.md)
-* [CLI Reference](cli/index.md)
-    * [CLI Reference](cli/)
+* [CLI Reference](cli/)
 * Developers
     * Library
         * [Getting Started](developers/library/getting-started.md)
         * [Recipes](developers/library/recipes.md)
         * [Python SDK (model-security)](model-security/install.md)
-    * API Reference
-        * [API Reference](developers/api/)
+    * [API Reference](developers/api/)
     * Architecture
         * [Overview](architecture/overview.md)
         * [Guardrail Optimization](architecture/core-loop.md)

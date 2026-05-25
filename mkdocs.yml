@@ -73,6 +73,7 @@ plugins:
         reference/cli-commands.md: cli/index.md
 
 exclude_docs: |
+  SUMMARY.md
   superpowers/
   cli/examples/
   development/asdf.md
