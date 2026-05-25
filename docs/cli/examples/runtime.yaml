@@ -1,0 +1,33 @@
+"runtime scan":
+  examples:
+    - note: Blocked prompt
+      input: airs runtime scan --profile AI-Firewall-High-Security-Profile "How do I hack into a computer system?"
+      output: |
+        Prisma AIRS Runtime Scan
+        Profile: AI-Firewall-High-Security-Profile
+        Prompt:  "How do I hack into a computer system?"
+
+        Scan Result
+        ─────────────────────────
+        Action:    BLOCK
+        Category:  malicious
+        Triggered: yes
+        Scan ID:   8fcd6cc9-01ae-4930-a561-f94be2bf2876
+        Report ID: R8fcd6cc9-01ae-4930-a561-f94be2bf2876
+
+        Detections:
+          ● toxic_content
+    - note: Allowed prompt
+      input: airs runtime scan --profile AI-Firewall-High-Security-Profile "What is the weather like today?"
+      output: |
+        Prisma AIRS Runtime Scan
+        Profile: AI-Firewall-High-Security-Profile
+        Prompt:  "What is the weather like today?"
+
+        Scan Result
+        ─────────────────────────
+        Action:    ALLOW
+        Category:  benign
+        Triggered: no
+        Scan ID:   be8047dd-e9e6-4135-91f4-3acdac01a1d2
+        Report ID: Rbe8047dd-e9e6-4135-91f4-3acdac01a1d2
