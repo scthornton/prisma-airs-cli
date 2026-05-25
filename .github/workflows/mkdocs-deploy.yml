@@ -7,7 +7,7 @@ on:
       - "docs/**"
       - "mkdocs.yml"
       - "scripts/**"
-      - "src/cli/**"
+      - "src/**"
       - "typedoc.json"
       - "package.json"
       - ".github/workflows/mkdocs-deploy.yml"
