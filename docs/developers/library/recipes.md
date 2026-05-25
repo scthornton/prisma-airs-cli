@@ -111,7 +111,7 @@ for (const t of topics) {
 
 // Fetch a single topic by name.
 const topic = await mgmt.getTopicByName('off-topic-finance');
-console.log('Description:', topic.topic_description);
+console.log('Description:', topic.description);
 ```
 
 ---
