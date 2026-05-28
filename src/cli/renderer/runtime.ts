@@ -422,6 +422,115 @@ export function renderCustomerAppDetail(app: {
   console.log();
 }
 
+/** Render per-app consumption + violation breakdown. */
+export function renderCustomerAppConsumption(
+  data: {
+    appId: string;
+    appName: string;
+    cloud?: string;
+    source?: string;
+    monitoringSince?: string;
+    profiles: string[];
+    tokens: {
+      dailyAverage?: number;
+      dailyAverageScale?: string;
+      monthlyTotal?: number;
+      monthlyTotalScale?: string;
+    };
+    sessions: { total: number; violating: number };
+    detectors: Array<{
+      type: string;
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+      total: number;
+    }>;
+    totalViolating: number;
+  },
+  format: OutputFormat = 'pretty',
+): void {
+  const fmt = (n?: number, scale?: string) => (n == null ? '-' : `${n}${scale ?? ''}`);
+
+  if (format !== 'pretty') {
+    // Per-detector rows for table/csv/json/yaml. Adds app-level fields so each row is
+    // self-contained (useful for piping into reporting tools).
+    const rows = data.detectors.map((d) => ({
+      app_name: data.appName,
+      app_id: data.appId,
+      monitoring_since: data.monitoringSince ?? '',
+      daily_avg: fmt(data.tokens.dailyAverage, data.tokens.dailyAverageScale),
+      monthly_total: fmt(data.tokens.monthlyTotal, data.tokens.monthlyTotalScale),
+      sessions_total: data.sessions.total,
+      sessions_violating: data.sessions.violating,
+      detector: d.type,
+      critical: d.critical,
+      high: d.high,
+      medium: d.medium,
+      low: d.low,
+      total: d.total,
+    }));
+    console.log(
+      formatOutput(
+        rows,
+        [
+          { key: 'app_name', label: 'App' },
+          { key: 'app_id', label: 'AppId' },
+          { key: 'monitoring_since', label: 'MonitoringSince' },
+          { key: 'daily_avg', label: 'DailyAvg' },
+          { key: 'monthly_total', label: 'MonthlyTotal' },
+          { key: 'sessions_total', label: 'Sessions' },
+          { key: 'sessions_violating', label: 'Violating' },
+          { key: 'detector', label: 'Detector' },
+          { key: 'critical', label: 'C' },
+          { key: 'high', label: 'H' },
+          { key: 'medium', label: 'M' },
+          { key: 'low', label: 'L' },
+          { key: 'total', label: 'Total' },
+        ],
+        format,
+      ),
+    );
+    return;
+  }
+
+  console.log(chalk.bold(`\n  ${data.appName}  ${chalk.dim('(' + data.appId + ')')}`));
+  if (data.monitoringSince) console.log(`    Monitoring since: ${chalk.dim(data.monitoringSince)}`);
+  if (data.source) console.log(`    Source:           ${data.source}`);
+  if (data.cloud) console.log(`    Cloud:            ${data.cloud}`);
+  if (data.profiles.length > 0) {
+    console.log(`    Profiles:         ${data.profiles.join(', ')}`);
+  }
+
+  console.log(chalk.bold('\n    Token consumption:'));
+  console.log(
+    `      Daily avg:     ${fmt(data.tokens.dailyAverage, data.tokens.dailyAverageScale)}`,
+  );
+  console.log(
+    `      Monthly total: ${fmt(data.tokens.monthlyTotal, data.tokens.monthlyTotalScale)}`,
+  );
+
+  console.log(chalk.bold('\n    Sessions:'));
+  console.log(`      Total:     ${data.sessions.total}`);
+  console.log(`      Violating: ${data.sessions.violating}`);
+
+  const firing = data.detectors.filter((d) => d.total > 0);
+  console.log(
+    chalk.bold(
+      `\n    Detectors (${data.totalViolating} violating, ${firing.length}/${data.detectors.length} firing):`,
+    ),
+  );
+  if (firing.length === 0) {
+    console.log(chalk.dim('      no detector violations in window'));
+  } else {
+    for (const d of firing) {
+      const sev = `c=${d.critical} h=${d.high} m=${d.medium} l=${d.low}`;
+      console.log(`      ${d.type.padEnd(20)} ${String(d.total).padStart(5)}  ${chalk.dim(sev)}`);
+    }
+  }
+  console.log();
+}
+
 /** Render deployment profile list. */
 export function renderDeploymentProfileList(
   profiles: Array<{ raw: Record<string, unknown> }>,

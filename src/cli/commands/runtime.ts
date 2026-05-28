@@ -18,6 +18,7 @@ import {
   type OutputFormat,
   renderApiKeyDetail,
   renderApiKeyList,
+  renderCustomerAppConsumption,
   renderCustomerAppDetail,
   renderCustomerAppList,
   renderDeploymentProfileList,
@@ -308,6 +309,56 @@ export function registerRuntimeCommand(program: Command): void {
         const service = await createMgmtService();
         const app = await service.deleteCustomerApp(appName, opts.updatedBy);
         console.log(`  Customer app "${app.name}" deleted.\n`);
+      } catch (err) {
+        renderError(err instanceof Error ? err.message : String(err));
+        process.exit(1);
+      }
+    });
+
+  customerApps
+    .command('consumption [appName]')
+    .description(
+      'Show per-app token consumption + violation breakdown (SCM dashboard). Omit appName to scan all apps.',
+    )
+    .option('--time-interval <n>', 'Window in days: 7, 30, or 60', '30')
+    .option('--output <format>', 'Output format: pretty, table, csv, json, yaml', 'pretty')
+    .action(async (appName: string | undefined, opts) => {
+      try {
+        const fmt = opts.output as OutputFormat;
+        const interval = Number.parseInt(opts.timeInterval, 10);
+        if (interval !== 7 && interval !== 30 && interval !== 60) {
+          renderError('--time-interval must be 7, 30, or 60 (the API rejects other values)');
+          process.exit(1);
+        }
+        if (fmt === 'pretty') renderRuntimeConfigHeader();
+
+        const service = await createMgmtService();
+
+        // Single app mode: explicit name was given.
+        if (appName) {
+          const data = await service.getCustomerAppConsumption(appName, {
+            timeInterval: interval,
+          });
+          renderCustomerAppConsumption(data, fmt);
+          return;
+        }
+
+        // All-apps mode: loop the list and emit one record per app.
+        const list = await service.listCustomerApps({ limit: 100 });
+        if (list.apps.length === 0) {
+          console.log('  No customer apps found.');
+          return;
+        }
+        for (const app of list.apps) {
+          try {
+            const data = await service.getCustomerAppConsumption(app.name, {
+              timeInterval: interval,
+            });
+            renderCustomerAppConsumption(data, fmt);
+          } catch (err) {
+            renderError(`[${app.name}] ${err instanceof Error ? err.message : String(err)}`);
+          }
+        }
       } catch (err) {
         renderError(err instanceof Error ? err.message : String(err));
         process.exit(1);

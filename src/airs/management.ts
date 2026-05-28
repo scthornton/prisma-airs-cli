@@ -9,6 +9,8 @@ import type { ProfileTopic } from '../audit/types.js';
 import type {
   ApiKeyInfo,
   ApiKeyListResult,
+  ConsumptionQueryOptions,
+  CustomerAppConsumption,
   CustomerAppInfo,
   CustomerAppListResult,
   DeleteResponse,
@@ -364,6 +366,69 @@ export class SdkManagementService implements ManagementService {
   async deleteCustomerApp(appName: string, updatedBy: string): Promise<CustomerAppInfo> {
     const response = await this.client.customerApps.delete(appName, updatedBy);
     return this.normalizeCustomerApp(response as unknown as Record<string, unknown>);
+  }
+
+  async getCustomerAppConsumption(
+    appName: string,
+    opts?: ConsumptionQueryOptions,
+  ): Promise<CustomerAppConsumption> {
+    // The dashboard endpoints need BOTH appId and appName; the only way to resolve appId
+    // from a name is via the list endpoint, so do that first.
+    const list = (await this.client.customerApps.list({
+      offset: 0,
+      limit: 100,
+    })) as unknown as { customer_apps?: Array<Record<string, unknown>> };
+    const apps = list.customer_apps ?? [];
+    const target = apps.find((a) => (a.app_name as string) === appName);
+    const appId = target?.customer_appId as string | undefined;
+    if (!appId) {
+      throw new Error(
+        `Customer app not found: "${appName}". Run \`airs runtime customer-apps list\` to see available apps.`,
+      );
+    }
+
+    const timeInterval = opts?.timeInterval ?? 30;
+    const query = { appId, appName, timeInterval } as const;
+
+    const [overview, breakdown] = await Promise.all([
+      this.client.dashboard.application(query),
+      this.client.dashboard.applicationViolationBreakdown(query),
+    ]);
+
+    const ts = overview.token_stats ?? {};
+    const ss = overview.session_stats ?? {};
+    const detectors = (breakdown.detection_type_violation_breakdown ?? []).map((entry) => {
+      const vb = entry.violation_breakdown ?? {};
+      return {
+        type: entry.detection_type ?? 'unknown',
+        critical: vb.critical ?? 0,
+        high: vb.high ?? 0,
+        medium: vb.medium ?? 0,
+        low: vb.low ?? 0,
+        total: vb.total ?? 0,
+      };
+    });
+
+    return {
+      appId,
+      appName,
+      cloud: overview.cloud ?? undefined,
+      source: overview.source ?? undefined,
+      monitoringSince: overview.created_at ?? undefined,
+      profiles: overview.profiles ?? [],
+      tokens: {
+        dailyAverage: ts.average_daily_tokens ?? undefined,
+        dailyAverageScale: ts.average_daily_tokens_scale ?? undefined,
+        monthlyTotal: ts.monthly_total_tokens ?? undefined,
+        monthlyTotalScale: ts.monthly_total_tokens_scale ?? undefined,
+      },
+      sessions: {
+        total: ss.total ?? 0,
+        violating: ss.violating ?? 0,
+      },
+      detectors,
+      totalViolating: breakdown.total_violating ?? 0,
+    };
   }
 
   // -------------------------------------------------------------------------

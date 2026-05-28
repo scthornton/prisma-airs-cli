@@ -47,6 +47,8 @@ const mockCustomerAppsUpdate = vi.fn();
 const mockCustomerAppsDelete = vi.fn();
 const mockDeploymentProfilesList = vi.fn();
 const mockScanLogsQuery = vi.fn();
+const mockDashboardApplication = vi.fn();
+const mockDashboardViolationBreakdown = vi.fn();
 
 vi.mock('@cdot65/prisma-airs-sdk', () => ({
   ManagementClient: vi.fn().mockImplementation(() => ({
@@ -83,6 +85,10 @@ vi.mock('@cdot65/prisma-airs-sdk', () => ({
     },
     scanLogs: {
       query: mockScanLogsQuery,
+    },
+    dashboard: {
+      application: mockDashboardApplication,
+      applicationViolationBreakdown: mockDashboardViolationBreakdown,
     },
   })),
 }));
@@ -1177,6 +1183,125 @@ describe('SdkManagementService', () => {
         filter: 'threat',
         page_token: undefined,
       });
+    });
+  });
+
+  describe('getCustomerAppConsumption', () => {
+    function primeApps() {
+      mockCustomerAppsList.mockResolvedValue({
+        customer_apps: [
+          { customer_appId: 'uuid-chatbot', app_name: 'chatbot' },
+          { customer_appId: 'uuid-litellm', app_name: 'litellm' },
+        ],
+        next_offset: 0,
+      });
+    }
+
+    it('resolves appId from list, calls both dashboard endpoints, normalizes the result', async () => {
+      primeApps();
+      mockDashboardApplication.mockResolvedValue({
+        id: 'uuid-chatbot',
+        name: 'chatbot',
+        cloud: 'other',
+        source: 'api',
+        created_at: '2026-04-29T17:04:52Z',
+        profiles: ['ms-tuned', 'golden-v2'],
+        token_stats: {
+          average_daily_tokens: 744.233,
+          average_daily_tokens_scale: 'K',
+          monthly_total_tokens: 17.71,
+          monthly_total_tokens_scale: 'M',
+        },
+        session_stats: { total: 56935, violating: 31136 },
+      });
+      mockDashboardViolationBreakdown.mockResolvedValue({
+        detection_type_violation_breakdown: [
+          {
+            detection_type: 'topic_guardrails',
+            violation_breakdown: { critical: 0, high: 0, medium: 3, low: 0, total: 3 },
+          },
+          {
+            detection_type: 'dlp',
+            violation_breakdown: { critical: 0, high: 0, medium: 0, low: 0, total: 0 },
+          },
+        ],
+        total_violating: 3,
+      });
+
+      const result = await service.getCustomerAppConsumption('chatbot');
+
+      expect(result.appId).toBe('uuid-chatbot');
+      expect(result.appName).toBe('chatbot');
+      expect(result.tokens.dailyAverage).toBe(744.233);
+      expect(result.tokens.dailyAverageScale).toBe('K');
+      expect(result.tokens.monthlyTotalScale).toBe('M');
+      expect(result.sessions.total).toBe(56935);
+      expect(result.sessions.violating).toBe(31136);
+      expect(result.profiles).toEqual(['ms-tuned', 'golden-v2']);
+      expect(result.totalViolating).toBe(3);
+      expect(result.detectors).toHaveLength(2);
+      const tg = result.detectors.find((d) => d.type === 'topic_guardrails');
+      expect(tg).toEqual({
+        type: 'topic_guardrails',
+        critical: 0,
+        high: 0,
+        medium: 3,
+        low: 0,
+        total: 3,
+      });
+
+      expect(mockDashboardApplication).toHaveBeenCalledWith({
+        appId: 'uuid-chatbot',
+        appName: 'chatbot',
+        timeInterval: 30,
+      });
+      expect(mockDashboardViolationBreakdown).toHaveBeenCalledWith({
+        appId: 'uuid-chatbot',
+        appName: 'chatbot',
+        timeInterval: 30,
+      });
+    });
+
+    it('passes through the timeInterval option', async () => {
+      primeApps();
+      mockDashboardApplication.mockResolvedValue({});
+      mockDashboardViolationBreakdown.mockResolvedValue({});
+
+      await service.getCustomerAppConsumption('litellm', { timeInterval: 60 });
+
+      expect(mockDashboardApplication).toHaveBeenCalledWith({
+        appId: 'uuid-litellm',
+        appName: 'litellm',
+        timeInterval: 60,
+      });
+    });
+
+    it('throws a clear error when the app name is not found in the list', async () => {
+      mockCustomerAppsList.mockResolvedValue({ customer_apps: [], next_offset: 0 });
+      await expect(service.getCustomerAppConsumption('nonexistent')).rejects.toThrow(
+        /Customer app not found.*nonexistent/i,
+      );
+      expect(mockDashboardApplication).not.toHaveBeenCalled();
+      expect(mockDashboardViolationBreakdown).not.toHaveBeenCalled();
+    });
+
+    it('returns zeros for missing/null fields rather than throwing', async () => {
+      primeApps();
+      mockDashboardApplication.mockResolvedValue({
+        name: null,
+        token_stats: null,
+        session_stats: null,
+        profiles: null,
+      });
+      mockDashboardViolationBreakdown.mockResolvedValue({});
+
+      const result = await service.getCustomerAppConsumption('chatbot');
+      expect(result.tokens.dailyAverage).toBeUndefined();
+      expect(result.sessions.total).toBe(0);
+      expect(result.sessions.violating).toBe(0);
+      expect(result.profiles).toEqual([]);
+      expect(result.detectors).toEqual([]);
+      expect(result.totalViolating).toBe(0);
     });
   });
 });
