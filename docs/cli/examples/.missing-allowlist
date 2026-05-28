@@ -4,8 +4,6 @@
 runtime api-keys delete
 # Blocked by upstream — see https://github.com/cdot65/prisma-airs-cli/issues/115
 runtime customer-apps get
-# Awaiting curated sidecars from PR #236 author — new command in v2.12.0
-runtime customer-apps consumption
 # Blocked by upstream API 503 — see https://github.com/cdot65/prisma-airs-cli/issues/193
 runtime customer-apps update
 # Blocked by SDK — see https://github.com/cdot65/prisma-airs-sdk/issues/167
