@@ -851,6 +851,52 @@ export interface CustomerAppListResult {
   nextOffset?: number;
 }
 
+/**
+ * Per-app consumption + violation snapshot, normalized from the SDK's dashboard endpoints.
+ * Time window is fixed at construction.
+ */
+export interface CustomerAppConsumption {
+  appId: string;
+  appName: string;
+  cloud?: string;
+  source?: string;
+  /** ISO timestamp of first monitoring (corresponds to SCM panel's "Monitoring Since"). */
+  monitoringSince?: string;
+  /** Attached security profile names. */
+  profiles: string[];
+  /** Token consumption stats with scale qualifier (K = thousands, M = millions). */
+  tokens: {
+    dailyAverage?: number;
+    dailyAverageScale?: string;
+    monthlyTotal?: number;
+    monthlyTotalScale?: string;
+  };
+  /** Session activity counts over the window. */
+  sessions: {
+    total: number;
+    violating: number;
+  };
+  /** Per-detector violation severity counts, one entry per detection_type. */
+  detectors: Array<{
+    type: string;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    total: number;
+  }>;
+  /** Sum of violating sessions across all detectors (mirrors SCM panel's badge). */
+  totalViolating: number;
+}
+
+/** Allowed values for `--time-interval`. The API enforces this enum (other values return 400). */
+export type ConsumptionTimeInterval = 7 | 30 | 60;
+
+/** Options for {@link ManagementService.getCustomerAppConsumption}. */
+export interface ConsumptionQueryOptions {
+  timeInterval?: ConsumptionTimeInterval;
+}
+
 // ---------------------------------------------------------------------------
 // Deployment profile types
 // ---------------------------------------------------------------------------
@@ -946,6 +992,11 @@ export interface ManagementService {
   getCustomerApp(appName: string): Promise<CustomerAppInfo>;
   updateCustomerApp(appId: string, request: Record<string, unknown>): Promise<CustomerAppInfo>;
   deleteCustomerApp(appName: string, updatedBy: string): Promise<CustomerAppInfo>;
+  /** Get per-app token consumption + violation breakdown from the SCM dashboard endpoints. */
+  getCustomerAppConsumption(
+    appName: string,
+    opts?: ConsumptionQueryOptions,
+  ): Promise<CustomerAppConsumption>;
 
   // Deployment profiles
   listDeploymentProfiles(opts?: { unactivated?: boolean }): Promise<DeploymentProfileInfo[]>;
