@@ -139,3 +139,29 @@ airs runtime customer-apps delete [options] <appName>
 
 !!! warning "Example needed"
     No curated input/output example for this command yet.
+
+---
+
+### runtime customer-apps consumption
+
+Show per-app token consumption + violation breakdown (SCM dashboard). Omit appName to scan all apps.
+
+```text
+airs runtime customer-apps consumption [options] [appName]
+```
+
+#### Arguments
+
+- `appName` (optional) —
+
+#### Options
+
+| Flag | Required | Default | Description |
+|------|:--------:|---------|-------------|
+| `--time-interval <n>` | No | `30` | Window in days: 7, 30, or 60 |
+| `--output <format>` | No | `pretty` | Output format: pretty, table, csv, json, yaml |
+
+#### Examples
+
+!!! warning "Example needed"
+    No curated input/output example for this command yet.
